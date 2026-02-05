@@ -10,9 +10,12 @@ int main(int argc, char** argv) {
   }
   std::vector<std::string> args(argv + 1, argv + argc - 1);
 
-  std::string filename = std::filesystem::absolute(argv[0]);
+  std::string filename = std::filesystem::absolute(argv[1]);
   if(!std::filesystem::exists(filename)) {
     std::cerr << "The file \"" + filename + "\" doesn't exist\n";
     exit(1);
+  }
+  for(auto& s : extract_includes(filename)) {
+    std::cout << s << "\n";
   }
 }
