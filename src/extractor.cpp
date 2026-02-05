@@ -7,7 +7,7 @@ std::vector<std::string> get_quote_includes(const std::string& buffer) {
   // This uses std::regex which is notoriously slow but the regex is linear
   // and simple enough that matching should be fast even on a bad backtracking
   // engine implementation (it has no "|" or suspicious "+" usage)
-  static const std::regex inc_re(R"(#include[ ]*"[-A-Za-z_.]*")", std::regex::basic);
+  static const std::regex inc_re(R"==(#include[ ]*"([-A-Za-z0-9_.]*)")==", std::regex::extended);
 
   std::vector<std::string> results;
   auto begin = std::sregex_iterator(buffer.begin(), buffer.end(), inc_re);
@@ -15,7 +15,7 @@ std::vector<std::string> get_quote_includes(const std::string& buffer) {
 
   for(std::sregex_iterator it = begin; it != end; it++) {
     std::smatch match = *it;
-    results.push_back(match[0].str());
+    results.push_back(match[1].str());
   }
   return results;
 }
