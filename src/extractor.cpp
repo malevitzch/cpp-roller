@@ -6,6 +6,16 @@
 
 static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_.]*)")==", std::regex::extended);
 
+std::string file_to_string(std::string filename) {
+  std::ifstream input(filename);
+  std::vector<std::string> result;
+
+
+  std::stringstream buffer;
+  buffer << input.rdbuf();
+  return buffer.str();
+}
+
 std::vector<std::string> get_quote_includes(const std::string& buffer) {
   // This uses std::regex which is notoriously slow but the regex is linear
   // and simple enough that matching should be fast even on a bad backtracking
@@ -21,18 +31,16 @@ std::vector<std::string> get_quote_includes(const std::string& buffer) {
   }
   return results;
 }
-std::string remove_quote_includes(const std::string& buffer) {
+
+std::string remove_quote_includes(std::string buffer) {
   return std::regex_replace(buffer, include_re, "");
 }
 
+std::string extract_blob(std::string filename) {
+  return remove_quote_includes(file_to_string(filename));
+}
+
 std::vector<std::string> extract_includes(std::string filename) {
-  std::ifstream input(filename);
-  std::vector<std::string> result;
 
-
-  std::stringstream buffer;
-  buffer << input.rdbuf();
-  std::string file = buffer.str();
-
-  return get_quote_includes(file);
+  return get_quote_includes(file_to_string(filename));
 }
