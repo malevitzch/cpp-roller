@@ -2,6 +2,7 @@
 #define GRAPHER_HPP
 
 #include <string>
+#include <vector>
 #include <map>
 #include <set>
 
@@ -17,5 +18,7 @@ public:
   void add_dependency(std::string dependant, std::string dependency);
   std::set<std::string>& get_dependencies(std::string file);
 };
+
+DependencyGraph create_graph(std::vector<std::string> sources);
 
 #endif
