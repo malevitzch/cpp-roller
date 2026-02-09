@@ -2,6 +2,8 @@
 #include "extractor.hpp"
 
 #include <filesystem>
+#include <ranges>
+
 namespace fs = std::filesystem;
 
 // Assumes 'filename' is an absolute path
@@ -12,16 +14,26 @@ bool DependencyGraph::add_file(std::string filename) {
   return true;
 }
 
-void DependencyGraph::add_dependency(std::string dependant, std::string dependency) {
+void DependencyGraph::add_dependency(fs::path dependant, fs::path dependency) {
   data[dependant].dependencies.insert(dependency);
 }
 
-std::set<std::string>& DependencyGraph::get_dependencies(std::string file) {
+std::set<fs::path>& DependencyGraph::get_dependencies(std::string file) {
   return data[file].dependencies;
 }
 
-void crawl(const std::string& source, DependencyGraph& graph) {
-  // TODO: impl
+void crawl(const fs::path& source, DependencyGraph& graph) {
+  fs::path dir = source.parent_path();
+  if(!graph.add_file(source)) return; // Do not re-enter already visited files
+  std::vector<std::string> includes = extract_includes(source);
+
+  auto view = includes | std::views::transform([&](const std::string& p) {return dir / p;});
+  std::vector<fs::path> dependencies(view.begin(), view.end());
+
+  for(fs::path& dependency : dependencies) {
+    graph.add_dependency(source, dependency);
+    crawl(dependency, graph);
+  }
 }
 
 DependencyGraph create_graph(std::vector<std::string> sources) {

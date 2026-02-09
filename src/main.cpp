@@ -2,6 +2,7 @@
 #include <vector>
 #include <filesystem>
 #include "extractor.hpp"
+#include "grapher.hpp"
 
 int main(int argc, char** argv) {
   if(argc < 2) {
@@ -18,4 +19,5 @@ int main(int argc, char** argv) {
   for(auto& s : extract_includes(filename)) {
     std::cout << s << "\n";
   }
+  create_graph({filename});
 }
