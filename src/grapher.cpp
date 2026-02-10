@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 
 // Assumes 'filename' is an absolute path
 bool DependencyGraph::add_file(std::string filename) {
-  if(!data.contains(filename)) return false;
+  if(data.contains(filename)) return false;
   std::string blob = extract_blob(filename);
   data[filename].blob = blob;
   return true;

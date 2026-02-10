@@ -19,5 +19,10 @@ int main(int argc, char** argv) {
   for(auto& s : extract_includes(filename)) {
     std::cout << s << "\n";
   }
-  create_graph({filename});
+  try {
+    create_graph({filename});
+  } catch (std::filesystem::filesystem_error& e) {
+    // TODO: better output
+    std::cerr << e.what() << "\n";
+  }
 }

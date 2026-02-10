@@ -1,13 +1,20 @@
+#include <filesystem>
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <iostream>
 
 
 static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_.]*)")==", std::regex::extended);
 
 std::string file_to_string(std::string filename) {
   std::ifstream input(filename);
+  std::cout << filename << "\n";
+  if(!std::filesystem::exists(filename)) {
+    std::string msg = "Failed to load file \"" + filename + "\"";
+    throw std::filesystem::filesystem_error(msg, std::make_error_code(std::errc::no_such_file_or_directory));
+  }
   std::vector<std::string> result;
 
 
