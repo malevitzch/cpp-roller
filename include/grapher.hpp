@@ -13,13 +13,17 @@ private:
     std::string blob;
     std::set<std::filesystem::path> dependencies;
   };
-  std::map<std::string, FileData> data;
+  std::map<std::filesystem::path, FileData> data;
+  void toposort_dfs(std::filesystem::path path,
+                    std::set<std::filesystem::path>& vis,
+                    std::vector<std::filesystem::path>& res);
 public:
   bool add_file(std::string filename);
   void add_dependency(std::filesystem::path dependant, std::filesystem::path dependency);
   std::set<std::filesystem::path>& get_dependencies(std::string file);
+  std::vector<std::filesystem::path> sorted();
 };
 
-DependencyGraph create_graph(std::vector<std::string> sources);
+DependencyGraph create_graph(std::vector<std::filesystem::path> sources);
 
 #endif

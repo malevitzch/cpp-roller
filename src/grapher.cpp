@@ -36,9 +36,28 @@ void crawl(const fs::path& source, DependencyGraph& graph) {
   }
 }
 
-DependencyGraph create_graph(std::vector<std::string> sources) {
+void DependencyGraph::toposort_dfs(fs::path path,
+                  std::set<fs::path>& vis,
+                  std::vector<fs::path>& res) {
+  if(vis.contains(path)) return;
+  vis.insert(path);
+  for(fs::path next : data[path].dependencies)
+    toposort_dfs(next, vis, res);
+  res.push_back(path);
+
+}
+
+std::vector<std::filesystem::path> DependencyGraph::sorted() {
+  std::vector<fs::path> res;
+  std::set<fs::path> vis;
+  for(auto&[path, _] : data)
+    toposort_dfs(path, vis, res);
+  return res;
+}
+
+DependencyGraph create_graph(std::vector<fs::path> sources) {
   DependencyGraph result;
-  for(std::string& source : sources) {
+  for(fs::path& source : sources) {
     crawl(source, result);
   }
   return result;
