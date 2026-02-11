@@ -18,9 +18,10 @@ private:
                     std::set<std::filesystem::path>& vis,
                     std::vector<std::filesystem::path>& res);
 public:
-  bool add_file(std::string filename);
+  bool add_file(std::filesystem::path filename);
+  std::string get_blob(std::filesystem::path filename);
   void add_dependency(std::filesystem::path dependant, std::filesystem::path dependency);
-  std::set<std::filesystem::path>& get_dependencies(std::string file);
+  std::set<std::filesystem::path>& get_dependencies(std::filesystem::path file);
   std::vector<std::filesystem::path> sorted();
 };
 

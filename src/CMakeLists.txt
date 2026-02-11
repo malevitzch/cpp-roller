@@ -2,6 +2,7 @@ set(ROLL_SOURCES
   main.cpp
   extractor.cpp
   grapher.cpp
+  roller.cpp
 )
 
 add_executable(cpproll ${ROLL_SOURCES})

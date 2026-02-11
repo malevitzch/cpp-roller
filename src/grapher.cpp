@@ -7,18 +7,22 @@
 namespace fs = std::filesystem;
 
 // Assumes 'filename' is an absolute path
-bool DependencyGraph::add_file(std::string filename) {
+bool DependencyGraph::add_file(std::filesystem::path filename) {
   if(data.contains(filename)) return false;
   std::string blob = extract_blob(filename);
   data[filename].blob = blob;
   return true;
 }
 
+std::string DependencyGraph::get_blob(std::filesystem::path filename) {
+  return data[filename].blob;
+}
+
 void DependencyGraph::add_dependency(fs::path dependant, fs::path dependency) {
   data[dependant].dependencies.insert(dependency);
 }
 
-std::set<fs::path>& DependencyGraph::get_dependencies(std::string file) {
+std::set<fs::path>& DependencyGraph::get_dependencies(std::filesystem::path file) {
   return data[file].dependencies;
 }
 
@@ -44,7 +48,6 @@ void DependencyGraph::toposort_dfs(fs::path path,
   for(fs::path next : data[path].dependencies)
     toposort_dfs(next, vis, res);
   res.push_back(path);
-
 }
 
 std::vector<std::filesystem::path> DependencyGraph::sorted() {
