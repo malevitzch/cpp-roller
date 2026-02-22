@@ -8,3 +8,6 @@ set(ROLL_SOURCES
 add_executable(cpproll ${ROLL_SOURCES})
 
 target_include_directories(cpproll PRIVATE ../include/)
+target_compile_definitions(cpproll PRIVATE
+  ROLLER_VERSION="${PROJECT_VERSION}"
+)
