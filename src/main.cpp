@@ -8,6 +8,10 @@
 #endif
 
 int main(int argc, char** argv) {
+  #ifdef DEBUG
+  std::cerr << "cpp-roller is running in debugging mode, "
+            << "disable debug if it's not intended\n";
+  #endif
   if(argc < 2) {
     std::cerr << "Not enough arguments\n";
     exit(1);
@@ -20,8 +24,7 @@ int main(int argc, char** argv) {
 
   for(int i = 0; i < args.size(); i++) {
     if(args[i] == "-o") {
-      i++;
-      if(i >= args.size()) {
+      if(++i >= args.size()) {
         std::cerr << "-o option used without a filename argument\n";
         exit(1);
       }
@@ -37,7 +40,7 @@ int main(int argc, char** argv) {
   }
   if(sources.empty()) {
     std::cerr << "Not enough source files\nUsage: cpproll <filenames...>\n"
-              << "Optional arguments:\n" 
+              << "Optional arguments:\n"
               << "\t-o <filename>\n"
               << "\t-v\n";
     exit(1);

@@ -11,3 +11,4 @@ target_include_directories(cpproll PRIVATE ../include/)
 target_compile_definitions(cpproll PRIVATE
   ROLLER_VERSION="${PROJECT_VERSION}"
 )
+target_compile_definitions(cpproll PRIVATE $<$<CONFIG:Debug>:DEBUG>)
