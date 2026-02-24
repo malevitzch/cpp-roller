@@ -5,3 +5,5 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(googletest)
+
+include_directories(include)
