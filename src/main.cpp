@@ -3,9 +3,6 @@
 #include <filesystem>
 #include "roller.hpp"
 
-#ifndef ROLLER_VERSION
-#define ROLLER_VERSION "???"
-#endif
 
 int main(int argc, char** argv) {
   #ifdef DEBUG
@@ -18,9 +15,7 @@ int main(int argc, char** argv) {
   }
   std::vector<std::string> args(argv + 1, argv + argc);
 
-  std::vector<std::filesystem::path> sources = {};
-  std::string output_name = "a.out";
-  bool v = false; // Whether or not the "-v" flag has been input
+  RollerConfig config;
 
   for(int i = 0; i < args.size(); i++) {
     if(args[i] == "-o") {
@@ -28,25 +23,17 @@ int main(int argc, char** argv) {
         std::cerr << "-o option used without a filename argument\n";
         exit(1);
       }
-      output_name = args[i];
+      config.name(args[i]);
     }
     else if(args[i] == "-v") {
-      std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
-      exit(0);
+      config.version_flag();
     }
     else {
-      sources.push_back(args[i]);
+      config.add_source(args[i]);
     }
   }
-  if(sources.empty()) {
-    std::cerr << "Not enough source files\nUsage: cpproll <filenames...>\n"
-              << "Optional arguments:\n"
-              << "\t-o <filename>\n"
-              << "\t-v\n";
-    exit(1);
-  }
   try {
-    roll(sources, output_name);
+    roll(config);
   } catch (std::filesystem::filesystem_error& e) {
     // TODO: better output
     std::cerr << e.what() << "\n";
