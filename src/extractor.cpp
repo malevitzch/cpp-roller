@@ -14,8 +14,6 @@ std::string file_to_string(std::string filename) {
     std::string msg = "Failed to load file \"" + filename + "\"";
     throw std::filesystem::filesystem_error(msg, std::make_error_code(std::errc::no_such_file_or_directory));
   }
-  std::vector<std::string> result;
-
 
   std::stringstream buffer;
   buffer << input.rdbuf();
