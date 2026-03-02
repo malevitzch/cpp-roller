@@ -15,7 +15,10 @@ set(TEST_SOURCES
 
 add_executable(main_test ${TEST_SOURCES})
 target_include_directories(main_test PRIVATE include/)
+target_include_directories(main_test PRIVATE ../include/)
 target_link_libraries(main_test PRIVATE GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(main_test)
+gtest_discover_tests(main_test
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/files
+)

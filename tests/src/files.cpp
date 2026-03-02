@@ -1,6 +1,15 @@
 #include "files.hpp"
-
 #include <fstream>
+
+#include <gtest/gtest.h>
+
+void assert_file_exists(std::filesystem::path file) {
+    ASSERT_TRUE(std::filesystem::exists(file))
+        << "File does not exist: " << file;
+
+    ASSERT_TRUE(std::filesystem::is_regular_file(file))
+        << "Path is not a regular file: " << file;
+}
 
 std::string stringify_file(std::filesystem::path file) {
   if(!std::filesystem::exists(file)) {
@@ -21,4 +30,8 @@ int count_occurences(std::filesystem::path file, std::regex regex) {
   auto end = std::sregex_iterator();
 
   return std::distance(begin, end);
+}
+
+int count_occurences(std::filesystem::path file, std::string pattern) {
+  return count_occurences(file, std::regex(pattern));
 }
