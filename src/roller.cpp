@@ -12,7 +12,7 @@ namespace fs = std::filesystem;
 #endif
 
 void roll(RollerConfig& config) {
-  if(config.get_version_flag()) {
+  if(config.get_flag("version")) {
     std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
     exit(0);
   }
@@ -40,11 +40,14 @@ RollerConfig& RollerConfig::add_source(std::string source) {
   _sources.insert(source);
   return *this;
 }
-RollerConfig& RollerConfig::version_flag() {
-  _version = true;
-  return *this;
+RollerConfig& RollerConfig::flag(std::string name, bool value) {
+    _flags[name] = value;
+    return *this;
+}
+RollerConfig& RollerConfig::flag(std::string name) {
+  return flag(name, true);
 }
 
 const std::set<std::filesystem::path>& RollerConfig::get_sources() { return _sources; }
 std::string RollerConfig::get_output_name() { return _output_name; }
-bool RollerConfig::get_version_flag() { return _version; }
+bool RollerConfig::get_flag(std::string name) { return _flags[name]; }

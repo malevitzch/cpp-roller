@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
       config.name(args[i]);
     }
     else if(args[i] == "-v") {
-      config.version_flag();
+      config.flag("version");
     }
     else {
       config.add_source(args[i]);
