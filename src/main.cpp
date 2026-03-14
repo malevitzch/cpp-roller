@@ -3,12 +3,15 @@
 #include <filesystem>
 #include "roller.hpp"
 
+#ifndef DEBUG
+#define DEBUG false
+#endif
 
 int main(int argc, char** argv) {
-  #ifdef DEBUG
-  std::cerr << "cpp-roller is running in debugging mode, "
-            << "disable debug if it's not intended\n";
-  #endif
+  if constexpr(DEBUG) {
+    std::cerr << "cpp-roller is running in debugging mode, "
+              << "disable debug if it's not intended\n";
+  }
   if(argc < 2) {
     std::cerr << "Not enough arguments\n";
     exit(1);
