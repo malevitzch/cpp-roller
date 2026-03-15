@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_.]*)")==", std::regex::extended);
+static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_/.]*)")==", std::regex::extended);
 
 std::string file_to_string(std::string filename) {
   std::ifstream input(filename);
@@ -24,7 +24,6 @@ std::vector<std::string> get_quote_includes(const std::string& buffer) {
   // This uses std::regex which is notoriously slow but the regex is linear
   // and simple enough that matching should be fast even on a bad backtracking
   // engine implementation (it has no "|" or suspicious "+" usage)
-
   std::vector<std::string> results;
   auto begin = std::sregex_iterator(buffer.begin(), buffer.end(), include_re);
   auto end = std::sregex_iterator();
@@ -45,6 +44,12 @@ std::string extract_blob(std::string filename) {
 }
 
 std::vector<std::string> extract_includes(std::string filename) {
-
-  return get_quote_includes(file_to_string(filename));
+  auto includes = get_quote_includes(file_to_string(filename));
+  if constexpr(DEBUG) {
+    std::cerr << "Found " << includes.size() << " includes in \"" << filename << "\":\n";
+    for(auto& inc : includes) {
+      std::cerr << "\t" << inc << "\n";
+    }
+  }
+  return includes;
 }

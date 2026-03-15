@@ -1,6 +1,9 @@
 #ifndef ROLLER_HPP
 #define ROLLER_HPP
 
+#ifndef DEBUG
+#define DEBUG false
+#endif
 
 #include <set>
 #include <map>

@@ -4,6 +4,10 @@
 #include <filesystem>
 #include <ranges>
 
+#if defined(DEBUG) && DEBUG
+#include <iostream>
+#endif
+
 namespace fs = std::filesystem;
 
 // Assumes 'filename' is an absolute path
@@ -29,6 +33,9 @@ std::set<fs::path>& DependencyGraph::get_dependencies(std::filesystem::path file
 void crawl(const fs::path& source, DependencyGraph& graph) {
   fs::path dir = source.parent_path();
   if(!graph.add_file(source)) return; // Do not re-enter already visited files
+  if constexpr(DEBUG) {
+    std::cerr << "Found file: " << source << "\n";
+  }
   std::vector<std::string> includes = extract_includes(source);
 
   auto view = includes | std::views::transform([&](const std::string& p) {return dir / p;});

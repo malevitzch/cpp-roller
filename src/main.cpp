@@ -3,10 +3,6 @@
 #include <filesystem>
 #include "roller.hpp"
 
-#ifndef DEBUG
-#define DEBUG false
-#endif
-
 int main(int argc, char** argv) {
   if constexpr(DEBUG) {
     std::cerr << "cpp-roller is running in debugging mode, "
