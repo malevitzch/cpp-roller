@@ -22,6 +22,18 @@ namespace {
     ASSERT_EQ(count_occurences("rolled.cpp", "RIGHT_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "PARENT_INCLUDED"), 1);
   }
+  TEST_F(TestCleaner, Relative) {
+    assert_file_exists("relative/parent.cpp");
+    assert_file_exists("relative/children/direct.cpp");
+    assert_file_exists("relative/children/transitive.cpp");
+    registerFile("rolled.cpp");
+    RollerConfig conf = RollerConfig().add_source("relative/parent.cpp").name("rolled.cpp");
+    roll(conf);
+    assert_file_exists("rolled.cpp");
+    ASSERT_EQ(count_occurences("rolled.cpp", "PARENT_INCLUDED"), 1);
+    ASSERT_EQ(count_occurences("rolled.cpp", "DIRECT_INCLUDED"), 1);
+    ASSERT_EQ(count_occurences("rolled.cpp", "TRANSITIVE_INCLUDED"), 1);
+  }
 }
 
 int main(int argc, char **argv) {

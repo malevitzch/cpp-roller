@@ -9,5 +9,6 @@ option(BUILD_TESTING "Build tests" ON)
 
 add_subdirectory(src)
 if(BUILD_TESTING)
+  set(CMAKE_CTEST_ARGUMENTS --output-on-failure)
   add_subdirectory(tests)
 endif()
