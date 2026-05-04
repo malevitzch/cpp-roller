@@ -34,6 +34,21 @@ namespace {
     ASSERT_EQ(count_occurences("rolled.cpp", "DIRECT_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "TRANSITIVE_INCLUDED"), 1);
   }
+  TEST_F(TestCleaner, MultiSource) {
+      assert_file_exists("multi-source/common.cpp");
+      assert_file_exists("multi-source/sourceA.cpp");
+      assert_file_exists("multi-source/sourceB.cpp");
+      registerFile("rolled.cpp");
+      RollerConfig conf = RollerConfig()
+          .add_source("multi-source/sourceA.cpp")
+          .add_source("multi-source/sourceB.cpp")
+          .name("rolled.cpp");
+      roll(conf);
+      assert_file_exists("rolled.cpp");
+      ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_A_INCLUDED"), 1);
+      ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_B_INCLUDED"), 1);
+      ASSERT_EQ(count_occurences("rolled.cpp", "COMMON_INCLUDED"), 1);
+  }
 }
 
 int main(int argc, char **argv) {
