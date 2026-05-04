@@ -19,7 +19,12 @@ target_link_libraries(main_test PRIVATE GTest::gtest_main)
 target_link_libraries(main_test PRIVATE rollib)
 
 include(GoogleTest)
-file(COPY "${CMAKE_SOURCE_DIR}/tests/files" DESTINATION ${CMAKE_BINARY_DIR}/tests)
+add_custom_command(
+  TARGET main_test POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${CMAKE_SOURCE_DIR}/tests/files"
+  "${CMAKE_BINARY_DIR}/tests/files"
+)
 gtest_discover_tests(main_test
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/files
 )

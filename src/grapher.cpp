@@ -4,21 +4,19 @@
 #include <filesystem>
 #include <ranges>
 
-#if defined(DEBUG) && DEBUG
 #include <iostream>
-#endif
 
 namespace fs = std::filesystem;
 
 // Assumes 'filename' is an absolute path
-bool DependencyGraph::add_file(std::filesystem::path filename) {
+bool DependencyGraph::add_file(fs::path filename) {
   if(data.contains(filename)) return false;
   std::string blob = extract_blob(filename);
   data[filename].blob = blob;
   return true;
 }
 
-std::string DependencyGraph::get_blob(std::filesystem::path filename) {
+std::string DependencyGraph::get_blob(fs::path filename) {
   return data[filename].blob;
 }
 
@@ -26,7 +24,7 @@ void DependencyGraph::add_dependency(fs::path dependant, fs::path dependency) {
   data[dependant].dependencies.insert(dependency);
 }
 
-std::set<fs::path>& DependencyGraph::get_dependencies(std::filesystem::path file) {
+std::set<fs::path>& DependencyGraph::get_dependencies(fs::path file) {
   return data[file].dependencies;
 }
 
@@ -57,7 +55,7 @@ void DependencyGraph::toposort_dfs(fs::path path,
   res.push_back(path);
 }
 
-std::vector<std::filesystem::path> DependencyGraph::sorted() {
+std::vector<fs::path> DependencyGraph::sorted() {
   std::vector<fs::path> res;
   std::set<fs::path> vis;
   for(auto&[path, _] : data)
