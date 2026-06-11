@@ -28,7 +28,7 @@ void roll(RollerConfig& config) {
   std::vector<fs::path> sorted = graph.sorted();
   std::ofstream out(config.get_output_name());
   for(fs::path path : sorted) {
-    out << graph.get_blob(path);
+    out << graph.get_blob(path) << "\n";
   }
 }
 
