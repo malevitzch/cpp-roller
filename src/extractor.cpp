@@ -8,7 +8,7 @@
 #include <iostream>
 
 
-static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_/.]*)")==", std::regex::extended);
+static const std::regex include_re(R"==(#include[ ]*"([-A-Za-z0-9_/.]*)"[ ]*\n?)==", std::regex::ECMAScript);
 
 std::string file_to_string(std::string filename) {
   std::ifstream input(filename);
