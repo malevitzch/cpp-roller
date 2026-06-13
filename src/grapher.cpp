@@ -34,7 +34,7 @@ void crawl(const fs::path& source, DependencyGraph& graph) {
   if constexpr(DEBUG) {
     std::cerr << "Found file: " << source << "\n";
   }
-  std::vector<std::string> includes = extract_includes(source);
+  std::vector<std::string> includes = extract_includes(source, graph.get_angle_includes());
 
   auto view = includes | std::views::transform([&](const std::string& p) {return dir / p;});
   std::vector<fs::path> dependencies(view.begin(), view.end());
@@ -61,6 +61,10 @@ std::vector<fs::path> DependencyGraph::sorted() {
   for(auto&[path, _] : data)
     toposort_dfs(path, vis, res);
   return res;
+}
+
+std::set<std::string>& DependencyGraph::get_angle_includes() {
+  return angle_includes;
 }
 
 DependencyGraph create_graph(std::vector<fs::path> sources) {

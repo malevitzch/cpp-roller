@@ -49,6 +49,18 @@ namespace {
       ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_B_INCLUDED"), 1);
       ASSERT_EQ(count_occurences("rolled.cpp", "COMMON_INCLUDED"), 1);
   }
+  TEST_F(TestCleaner, TestAngleIncludeDedup) {
+      assert_file_exists("angle-include-dedup/left.cpp");
+      assert_file_exists("angle-include-dedup/right.cpp");
+      assert_file_exists("angle-include-dedup/parent.cpp");
+      registerFile("rolled.cpp");
+      RollerConfig conf = RollerConfig()
+          .add_source("angle-include-dedup/parent.cpp")
+          .name("rolled.cpp");
+      roll(conf);
+      assert_file_exists("rolled.cpp");
+      ASSERT_EQ(count_occurences("rolled.cpp", "<iostream>"), 1);
+  }
 }
 
 int main(int argc, char **argv) {

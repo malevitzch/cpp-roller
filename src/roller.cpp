@@ -27,6 +27,9 @@ void roll(RollerConfig& config) {
   DependencyGraph graph = create_graph(sources);
   std::vector<fs::path> sorted = graph.sorted();
   std::ofstream out(config.get_output_name());
+  for(std::string lib : graph.get_angle_includes()) {
+    out << "#include <" << lib << ">\n";
+  }
   for(fs::path path : sorted) {
     out << graph.get_blob(path) << "\n";
   }
