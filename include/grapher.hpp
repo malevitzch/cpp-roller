@@ -1,10 +1,6 @@
 #ifndef GRAPHER_HPP
 #define GRAPHER_HPP
 
-#ifndef DEBUG
-#define DEBUG false
-#endif
-
 #include <string>
 #include <vector>
 #include <map>

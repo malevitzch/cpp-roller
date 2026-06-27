@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <getopt.h>
 #include "roller.hpp"
+#include "common.hpp"
 
 int main(int argc, char** argv) {
   if constexpr(DEBUG) {

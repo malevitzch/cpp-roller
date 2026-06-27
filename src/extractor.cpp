@@ -1,4 +1,5 @@
 #include "extractor.hpp"
+#include "common.hpp"
 
 #include <filesystem>
 #include <vector>

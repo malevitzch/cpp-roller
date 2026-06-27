@@ -1,3 +1,4 @@
+#include "common.hpp"
 #include "roller.hpp"
 #include "grapher.hpp"
 
@@ -5,11 +6,6 @@
 #include <iostream>
 
 namespace fs = std::filesystem;
-
-
-#ifndef ROLLER_VERSION
-#define ROLLER_VERSION "???"
-#endif
 
 void roll(RollerConfig& config) {
   if(config.get_flag("version")) {

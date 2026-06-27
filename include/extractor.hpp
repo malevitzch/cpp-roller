@@ -1,10 +1,6 @@
 #ifndef EXTRACTOR_HPP
 #define EXTRACTOR_HPP
 
-#ifndef DEBUG
-#define DEBUG false
-#endif
-
 #include <string>
 #include <vector>
 #include <set>
