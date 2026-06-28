@@ -3,64 +3,80 @@
 #include "common.hpp"
 
 #include <filesystem>
+#include <fstream>
 #include <ranges>
 
 #include <iostream>
 
 namespace fs = std::filesystem;
 
-// Assumes 'filename' is an absolute path
-bool DependencyGraph::add_file(fs::path filename) {
-  if(data.contains(filename)) return false;
-  std::string blob = extract_blob(filename);
-  data[filename].blob = blob;
+FileData::FileData(fs::path path, FileHash hash) : path(path), hash(hash) {}
+
+FileHash hash_file(std::filesystem::path path) {
+  std::ifstream file(path);
+  std::string line;
+  size_t hash = 0;
+  while(std::getline(file, line)) {
+    hash = std::hash<std::string>{}(line) ^ hash;
+  }
+  return {fs::file_size(path), hash};
+}
+
+FileHash DependencyGraph::get_file_hash(fs::path path) {
+  path = fs::absolute(path);
+  if(!lookup.contains(path)) {
+    FileHash hash = hash_file(path);
+    lookup[path] = hash;
+  }
+  return lookup[path];
+}
+
+bool DependencyGraph::add_file(fs::path filepath) {
+  filepath = fs::absolute(filepath);
+  if(lookup.contains(filepath)) return false;
+  FileHash hash = get_file_hash(filepath);
+  lookup[filepath] = hash;
+  if(files.contains(hash)) return false;
+
+  files[hash] = FileData(filepath, lookup.at(filepath));
+  Includes includes = extract_includes(filepath);
+  for(const auto& inc : includes.angle) {
+    angle_includes.insert(inc);
+  }
+
+  fs::path dir = filepath.parent_path();
+  auto dep_view = includes.quote | std::views::transform([&](const std::string& p) {return dir / p;});
+  std::vector<fs::path> dependencies(dep_view.begin(), dep_view.end());
+  if constexpr(DEBUG) {
+    std::cout << dependencies.size() << " dependencies found for " << filepath << '\n';
+  }
+  for(const auto& dep : dependencies) {
+    FileHash dep_hash = get_file_hash(dep);
+    if(!files.contains(dep_hash)) add_file(dep);
+    files[hash].dependencies.insert(dep_hash);
+  }
+  
   return true;
 }
 
-std::string DependencyGraph::get_blob(fs::path filename) {
-  return data[filename].blob;
-}
-
-void DependencyGraph::add_dependency(fs::path dependant, fs::path dependency) {
-  data[dependant].dependencies.insert(dependency);
-}
-
-std::set<fs::path>& DependencyGraph::get_dependencies(fs::path file) {
-  return data[file].dependencies;
-}
-
-void crawl(const fs::path& source, DependencyGraph& graph) {
-  fs::path dir = source.parent_path();
-  if(!graph.add_file(source)) return; // Do not re-enter already visited files
-  if constexpr(DEBUG) {
-    std::cerr << "Found file: " << source << "\n";
-  }
-  std::vector<std::string> includes = extract_includes(source, graph.get_angle_includes());
-
-  auto view = includes | std::views::transform([&](const std::string& p) {return dir / p;});
-  std::vector<fs::path> dependencies(view.begin(), view.end());
-
-  for(fs::path& dependency : dependencies) {
-    graph.add_dependency(source, dependency);
-    crawl(dependency, graph);
-  }
-}
-
-void DependencyGraph::toposort_dfs(fs::path path,
-                  std::set<fs::path>& vis,
+void DependencyGraph::toposort_dfs(FileHash hash,
+                  std::set<FileHash>& vis,
                   std::vector<fs::path>& res) {
-  if(vis.contains(path)) return;
-  vis.insert(path);
-  for(fs::path next : data[path].dependencies)
-    toposort_dfs(next, vis, res);
-  res.push_back(path);
+  if(vis.contains(hash)) return;
+  vis.insert(hash);
+  for(FileHash next : files[hash].dependencies)
+    toposort_dfs(next, vis, res); 
+  res.push_back(files[hash].path);
 }
 
 std::vector<fs::path> DependencyGraph::sorted() {
   std::vector<fs::path> res;
-  std::set<fs::path> vis;
-  for(auto&[path, _] : data)
-    toposort_dfs(path, vis, res);
+  std::set<FileHash> vis;
+  for(auto&[hash, _] : files)
+    toposort_dfs(hash, vis, res);
+  if constexpr(DEBUG) {
+    std::cout << res.size() << " files sorted\n";
+  }
   return res;
 }
 
@@ -68,10 +84,8 @@ std::set<std::string>& DependencyGraph::get_angle_includes() {
   return angle_includes;
 }
 
-DependencyGraph create_graph(std::vector<fs::path> sources) {
-  DependencyGraph result;
+DependencyGraph::DependencyGraph(std::vector<fs::path> sources) {
   for(fs::path& source : sources) {
-    crawl(source, result);
+    add_file(source);
   }
-  return result;
 }

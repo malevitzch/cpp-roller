@@ -1,10 +1,15 @@
 #ifndef EXTRACTOR_HPP
 #define EXTRACTOR_HPP
-
 #include <string>
-#include <vector>
+#include <filesystem>
 #include <set>
-std::string extract_blob(std::string filename);
-std::vector<std::string> extract_includes(std::string filename, std::set<std::string>& angle_include_set);
+
+struct Includes {
+  std::set<std::string> angle;
+  std::set<std::string> quote;
+};
+
+Includes extract_includes(std::filesystem::path filename);
+std::ostream& send_without_includes(std::filesystem::path filename, std::ostream& output); 
 
 #endif
