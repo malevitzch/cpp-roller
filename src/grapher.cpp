@@ -33,7 +33,6 @@ FileHash DependencyGraph::get_file_hash(fs::path path) {
 
 bool DependencyGraph::add_file(fs::path filepath) {
   filepath = fs::absolute(filepath);
-  if(lookup.contains(filepath)) return false;
   FileHash hash = get_file_hash(filepath);
   lookup[filepath] = hash;
   if(files.contains(hash)) return false;
