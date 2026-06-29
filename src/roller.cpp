@@ -1,5 +1,5 @@
-#include "common.hpp"
 #include "roller.hpp"
+#include "extractor.hpp"
 #include "grapher.hpp"
 
 #include <fstream>

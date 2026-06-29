@@ -7,6 +7,9 @@
 #include "fixtures/cleaner.hpp"
 
 namespace {
+  /*
+   * A dependency of two children should only be included once.
+   */
   TEST_F(TestCleaner, Diamond) {
     assert_file_exists("diamond/parent.cpp");
     assert_file_exists("diamond/left.cpp");
@@ -34,6 +37,10 @@ namespace {
     ASSERT_EQ(count_occurences("rolled.cpp", "DIRECT_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "TRANSITIVE_INCLUDED"), 1);
   }
+  /*
+   * When multiple roots are given,
+   * they should still be rolled together.
+   */
   TEST_F(TestCleaner, MultiSource) {
       assert_file_exists("multi-source/common.cpp");
       assert_file_exists("multi-source/sourceA.cpp");
@@ -49,6 +56,10 @@ namespace {
       ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_B_INCLUDED"), 1);
       ASSERT_EQ(count_occurences("rolled.cpp", "COMMON_INCLUDED"), 1);
   }
+  /*
+   * Angle includes such as <iostream> should be collected
+   * and added at the beginning of the whole file.
+   */
   TEST_F(TestCleaner, TestAngleIncludeDedup) {
       assert_file_exists("angle-include-dedup/left.cpp");
       assert_file_exists("angle-include-dedup/right.cpp");
@@ -60,6 +71,22 @@ namespace {
       roll(conf);
       assert_file_exists("rolled.cpp");
       ASSERT_EQ(count_occurences("rolled.cpp", "<iostream>"), 1);
+  }
+  /*
+   * Completely identical files should only be included once.
+   */
+  TEST_F(TestCleaner, TestDuplicateFile) {
+      assert_file_exists("duplicate-file/parent.cpp");
+      assert_file_exists("duplicate-file/child.cpp");
+      assert_file_exists("duplicate-file/child_copy.cpp");
+      registerFile("rolled.cpp");
+      RollerConfig conf = RollerConfig()
+          .add_source("duplicate-file/parent.cpp")
+          .name("rolled.cpp");
+      roll(conf);
+      assert_file_exists("rolled.cpp");
+      ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_INCLUDED"), 1);
+      
   }
 }
 

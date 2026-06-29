@@ -1,8 +1,6 @@
 #ifndef GRAPHER_HPP
 #define GRAPHER_HPP
 
-#include "extractor.hpp"
-
 #include <string>
 #include <vector>
 #include <map>
