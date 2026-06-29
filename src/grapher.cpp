@@ -17,7 +17,7 @@ FileHash hash_file(std::filesystem::path path) {
   std::string line;
   size_t hash = 0;
   while(std::getline(file, line)) {
-    hash = std::hash<std::string>{}(line) ^ hash;
+    hash = hash_combine(std::hash<std::string>{}(line), hash);
   }
   return {fs::file_size(path), hash};
 }
@@ -39,9 +39,8 @@ bool DependencyGraph::add_file(fs::path filepath) {
 
   files[hash] = FileData(filepath, lookup.at(filepath));
   Includes includes = extract_includes(filepath);
-  for(const auto& inc : includes.angle) {
-    angle_includes.insert(inc);
-  }
+  for(const auto& inc : includes.angle) 
+    angle_includes.insert(inc); 
 
   fs::path dir = filepath.parent_path();
   auto dep_view = includes.quote | std::views::transform([&](const std::string& p) {return dir / p;});
@@ -84,7 +83,6 @@ std::set<std::string>& DependencyGraph::get_angle_includes() {
 }
 
 DependencyGraph::DependencyGraph(std::vector<fs::path> sources) {
-  for(fs::path& source : sources) {
-    add_file(source);
-  }
+  for(fs::path& source : sources)
+    add_file(source); 
 }
