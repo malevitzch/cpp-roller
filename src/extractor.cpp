@@ -8,8 +8,14 @@
 #include <set>
 
 
-static const std::regex quote_include_re(R"==(#include[ ]*"([-A-Za-z0-9_/.]*)"[ ]*\n?)==", std::regex::ECMAScript);
-static const std::regex angle_include_re(R"==(#include[ ]*<([-A-Za-z0-9_/.]*)>[ ]*\n?)==", std::regex::ECMAScript);
+static const std::regex quote_include_re(
+  R"==(^[ \t]*#include[ \t]*"([^"]+)"[ \t]*\n?)==",
+  std::regex::ECMAScript
+);
+static const std::regex angle_include_re(
+  R"==(^[ \t]*#include[ \t]*<([^>]+)>[ \t]*\n?)==",
+  std::regex::ECMAScript
+);
 
 std::optional<std::string> get_quote_include(std::string line) {
   std::smatch match;
