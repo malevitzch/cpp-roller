@@ -7,23 +7,26 @@
 #include <set>
 #include <filesystem>
 
+class DependencyGraph;
+class RollerConfig;
+
 // First is file size, second is the real hash.
 // This dramatically reduces the chances of a hash collision.
 using FileHash = std::pair<size_t, size_t>;
 
-class DependencyGraph;
 struct FileData {
   std::filesystem::path path;
   FileHash hash;
   std::set<FileHash> dependencies;
   FileData(std::filesystem::path path, FileHash hash);
-  FileData() = default; 
+  FileData() = default;
 };
 
 FileHash hash_file(std::filesystem::path path);
 
 class DependencyGraph {
 private:
+  RollerConfig& config;
   std::set<std::string> angle_includes;
   std::map<FileHash, FileData> files;
   std::map<std::filesystem::path, FileHash> lookup; // To avoid recompute.
@@ -33,11 +36,11 @@ private:
   FileHash get_file_hash(std::filesystem::path path);
 public:
   bool add_file(std::filesystem::path filename);
-  
+
   std::vector<std::filesystem::path> sorted();
   std::set<std::string>& get_angle_includes();
 
-  DependencyGraph(std::vector<std::filesystem::path> sources);
+  DependencyGraph(RollerConfig& config);
 };
 
 #endif

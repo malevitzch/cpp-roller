@@ -1,6 +1,7 @@
 #include "grapher.hpp"
 #include "extractor.hpp"
 #include "common.hpp"
+#include "roller.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -23,7 +24,7 @@ FileHash hash_file(std::filesystem::path path) {
 }
 
 FileHash DependencyGraph::get_file_hash(fs::path path) {
-  path = fs::absolute(path);
+  path = fs::weakly_canonical(path);
   if(!lookup.contains(path)) {
     FileHash hash = hash_file(path);
     lookup[path] = hash;
@@ -32,19 +33,30 @@ FileHash DependencyGraph::get_file_hash(fs::path path) {
 }
 
 bool DependencyGraph::add_file(fs::path filepath) {
-  filepath = fs::absolute(filepath);
+  filepath = fs::weakly_canonical(filepath);
   FileHash hash = get_file_hash(filepath);
   lookup[filepath] = hash;
   if(files.contains(hash)) return false;
 
   files[hash] = FileData(filepath, lookup.at(filepath));
   Includes includes = extract_includes(filepath);
-  for(const auto& inc : includes.angle) 
-    angle_includes.insert(inc); 
+  for(const auto& inc : includes.angle)
+    angle_includes.insert(inc);
 
   fs::path dir = filepath.parent_path();
-  auto dep_view = includes.quote | std::views::transform([&](const std::string& p) {return dir / p;});
-  std::vector<fs::path> dependencies(dep_view.begin(), dep_view.end());
+  std::vector<fs::path> dependencies;
+  for(const auto& p : includes.quote) {
+    bool found = false;
+    for(const auto& inc_dir : config.get_include_dirs()) {
+      fs::path dep = fs::weakly_canonical(inc_dir / p);
+      if(fs::exists(dep)) {
+        dependencies.push_back(dep);
+        found = true;
+        break;
+      }
+    }
+    if(!found) dependencies.push_back(fs::weakly_canonical(dir / p));
+  }
   if constexpr(DEBUG) {
     std::cout << dependencies.size() << " dependencies found for " << filepath << '\n';
   }
@@ -53,7 +65,7 @@ bool DependencyGraph::add_file(fs::path filepath) {
     if(!files.contains(dep_hash)) add_file(dep);
     files[hash].dependencies.insert(dep_hash);
   }
-  
+
   return true;
 }
 
@@ -63,7 +75,7 @@ void DependencyGraph::toposort_dfs(FileHash hash,
   if(vis.contains(hash)) return;
   vis.insert(hash);
   for(FileHash next : files[hash].dependencies)
-    toposort_dfs(next, vis, res); 
+    toposort_dfs(next, vis, res);
   res.push_back(files[hash].path);
 }
 
@@ -82,7 +94,7 @@ std::set<std::string>& DependencyGraph::get_angle_includes() {
   return angle_includes;
 }
 
-DependencyGraph::DependencyGraph(std::vector<fs::path> sources) {
-  for(fs::path& source : sources)
-    add_file(source); 
+DependencyGraph::DependencyGraph(RollerConfig& config) : config(config) {
+  for(const fs::path& source : config.get_sources())
+    add_file(source);
 }

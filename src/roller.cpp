@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 void roll(RollerConfig& config) {
   if(config.get_flag("version")) {
     std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
-    exit(0);
+    exit(EXIT_SUCCESS);
   }
   std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
   if(sources.empty()) {
@@ -18,9 +18,9 @@ void roll(RollerConfig& config) {
               << "Optional arguments:\n"
               << "\t-o <filename>\n"
               << "\t-v\n";
-    exit(1);
+    exit(EXIT_FAILURE);
   }
-  DependencyGraph graph(sources);
+  DependencyGraph graph(config);
   std::vector<fs::path> sorted = graph.sorted();
   std::ofstream out(config.get_output_name());
   for(std::string lib : graph.get_angle_includes()) {
@@ -39,6 +39,11 @@ RollerConfig& RollerConfig::add_source(std::string source) {
   _sources.insert(source);
   return *this;
 }
+RollerConfig& RollerConfig::add_include_directory(std::string path) {
+  fs::path p(path);
+  _include_paths.push_back(fs::weakly_canonical(p));
+  return *this;
+}
 RollerConfig& RollerConfig::flag(std::string name, bool value) {
     _flags[name] = value;
     return *this;
@@ -50,3 +55,4 @@ RollerConfig& RollerConfig::flag(std::string name) {
 const std::set<std::filesystem::path>& RollerConfig::get_sources() { return _sources; }
 std::string RollerConfig::get_output_name() { return _output_name; }
 bool RollerConfig::get_flag(std::string name) { return _flags[name]; }
+const std::vector<std::filesystem::path>& RollerConfig::get_include_dirs() { return _include_paths; }
