@@ -9,10 +9,6 @@ int main(int argc, char** argv) {
     std::cerr << "cpp-roller is running in debugging mode, "
               << "disable debug if it's not intended\n";
   }
-  if(argc < 2) {
-    std::cerr << "Not enough arguments\n";
-    exit(EXIT_FAILURE);
-  }
 
   static option long_opts[] = {
     {"help",    no_argument,       nullptr, 'h'},
@@ -27,6 +23,7 @@ int main(int argc, char** argv) {
   while ((opt = getopt_long(argc, argv, ":hvoI:", long_opts, nullptr)) != -1) {
     switch (opt) {
       case 'h':
+        config.flag("help");
         break;
       case 'v':
         config.flag("version");

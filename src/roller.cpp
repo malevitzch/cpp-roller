@@ -7,17 +7,28 @@
 
 namespace fs = std::filesystem;
 
+void print_help() {
+  std::cerr << "Usage: cpproll <filenames...>\n"
+            << "Optional arguments:\n"
+            << "\t-o <filename>   set output filename\n"
+            << "\t-v              show version and exit\n"
+            << "\t-h              show this help message and exit\n"
+            << "\t-I <path>       add include directory\n";
+}
+
 void roll(RollerConfig& config) {
   if(config.get_flag("version")) {
     std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
     exit(EXIT_SUCCESS);
   }
+  if(config.get_flag("help")) {
+    print_help();
+    exit(EXIT_SUCCESS);
+  }
   std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
   if(sources.empty()) {
-    std::cerr << "Not enough source files\nUsage: cpproll <filenames...>\n"
-              << "Optional arguments:\n"
-              << "\t-o <filename>\n"
-              << "\t-v\n";
+    std::cerr << "No source files provided\n";
+    print_help();
     exit(EXIT_FAILURE);
   }
   DependencyGraph graph(config);
