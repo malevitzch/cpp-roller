@@ -1,0 +1,6 @@
+If:
+  PathMatch: tests/files/.*
+Diagnostics:
+  Suppress: "*"
+Index:
+  Background: Skip
