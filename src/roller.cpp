@@ -1,6 +1,7 @@
 #include "roller.hpp"
 #include "extractor.hpp"
 #include "grapher.hpp"
+#include "common.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -50,9 +51,24 @@ RollerConfig& RollerConfig::add_source(std::string source) {
   _sources.insert(source);
   return *this;
 }
-RollerConfig& RollerConfig::add_include_directory(std::string path) {
-  fs::path p(path);
-  _include_paths.push_back(fs::weakly_canonical(p));
+
+RollerConfig& RollerConfig::add_include_directories(std::string paths) {
+  #ifdef _WIN32
+    constexpr char sep = ';';
+  #else
+    constexpr char sep = ':';
+  #endif
+
+  std::istringstream iss{paths};
+  std::string part;
+  while (std::getline(iss, part, sep)) {
+    if (!part.empty()) {
+      _include_paths.push_back(fs::weakly_canonical(part));
+      if constexpr(DEBUG) {
+        std::cout << "Added include directory: " << fs::weakly_canonical(part) << "\n";
+      }
+    }
+  }
   return *this;
 }
 RollerConfig& RollerConfig::flag(std::string name, bool value) {

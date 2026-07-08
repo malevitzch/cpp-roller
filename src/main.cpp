@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
   RollerConfig config;
   int opt;
-  while ((opt = getopt_long(argc, argv, ":hvoI:", long_opts, nullptr)) != -1) {
+  while ((opt = getopt_long(argc, argv, ":hvo:I:", long_opts, nullptr)) != -1) {
     switch (opt) {
       case 'h':
         config.flag("help");
@@ -32,9 +32,7 @@ int main(int argc, char** argv) {
         config.name(optarg);
         break;
       case 'I':
-        // TODO: this should support a classic list of directories
-        // separated by ':' or ';'
-        config.add_include_directory(optarg);
+        config.add_include_directories(optarg);
         break;
       case ':':
         std::cerr << "The option \"" << char(optopt) << "\" requires an argument\n";

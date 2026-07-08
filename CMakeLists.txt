@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(cpp-roller LANGUAGES CXX VERSION 3.3.1)
+project(cpp-roller LANGUAGES CXX VERSION 3.4.1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 

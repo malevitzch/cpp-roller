@@ -89,8 +89,11 @@ namespace {
       .name("rolled.cpp");
     roll(conf);
     assert_file_exists("rolled.cpp");
-    ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_INCLUDED"), 1);      
+    ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_INCLUDED"), 1);
   }
+  /*
+   * Filenames containing unicode characters should be recognized.
+   */
   TEST_F(TestCleaner, TestUnicode) {
     assert_file_exists("unicode/parent.cpp");
     assert_file_exists("unicode/中文.cpp");
@@ -100,7 +103,24 @@ namespace {
       .name("rolled.cpp");
     roll(conf);
     assert_file_exists("rolled.cpp");
-    ASSERT_EQ(count_occurences("rolled.cpp", "CHINESE_INCLUDED"), 1);      
+    ASSERT_EQ(count_occurences("rolled.cpp", "CHINESE_INCLUDED"), 1);
+  }
+  /*
+   *
+   */
+  TEST_F(TestCleaner, TestIncludeDirectories) {
+    assert_file_exists("include-directories/parent.cpp");
+    assert_file_exists("include-directories/libA/childA.cpp");
+    assert_file_exists("include-directories/libB/childB.cpp");
+    registerFile("rolled.cpp");
+    RollerConfig conf = RollerConfig()
+      .add_source("include-directories/parent.cpp")
+      .add_include_directories("include-directories/libA/:include-directories/libB/")
+      .name("rolled.cpp");
+    roll(conf);
+    assert_file_exists("rolled.cpp");
+    ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_A_INCLUDED"), 1);
+    ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_B_INCLUDED"), 1);
   }
 }
 

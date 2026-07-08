@@ -17,7 +17,7 @@ class RollerConfig {
     RollerConfig() = default;
     RollerConfig& name(std::string new_name);
     RollerConfig& add_source(std::string source);
-    RollerConfig& add_include_directory(std::string path);
+    RollerConfig& add_include_directories(std::string paths);
     RollerConfig& flag(std::string name, bool value);
     RollerConfig& flag(std::string name);
 
