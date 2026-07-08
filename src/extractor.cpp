@@ -1,5 +1,4 @@
 #include "extractor.hpp"
-#include "common.hpp"
 
 #include <filesystem>
 #include <optional>
@@ -20,7 +19,7 @@ static const std::regex angle_include_re(
 std::optional<std::string> get_quote_include(std::string line) {
   std::smatch match;
   if(std::regex_search(line, match, quote_include_re)) return match[1];
-  return std::nullopt;  
+  return std::nullopt;
 }
 std::optional<std::string> get_angle_include(std::string line) {
   std::smatch match;

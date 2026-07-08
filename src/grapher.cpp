@@ -5,7 +5,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <ranges>
 
 #include <iostream>
 

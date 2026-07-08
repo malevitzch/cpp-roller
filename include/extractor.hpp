@@ -10,6 +10,6 @@ struct Includes {
 };
 
 Includes extract_includes(std::filesystem::path filename);
-std::ostream& send_without_includes(std::filesystem::path filename, std::ostream& output); 
+std::ostream& send_without_includes(std::filesystem::path filename, std::ostream& output);
 
 #endif

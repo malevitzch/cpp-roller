@@ -6,8 +6,8 @@
 
 int main(int argc, char** argv) {
   if constexpr(DEBUG) {
-    std::cerr << "cpp-roller is running in debugging mode, "
-              << "disable debug if it's not intended\n";
+    std::cerr << "cpp-roller has been built in debugging mode, "
+              << "build with build type RELEASE if this is not intended\n";
   }
 
   static option long_opts[] = {
