@@ -6,6 +6,13 @@
 #include <filesystem>
 #include <vector>
 
+enum class RollResult : int {
+  Success = 0,
+  UserError = 1, // Bad CLI usage
+  FilesystemFailure = 2, // Missing/unreadable file
+  UnexplainedFailure = 3, // Anything else
+};
+
 class RollerConfig {
   private:
     std::string _output_name = "a.out";
@@ -27,6 +34,6 @@ class RollerConfig {
     const std::vector<std::filesystem::path>& get_include_dirs();
 };
 
-void roll(RollerConfig& config);
+RollResult roll(RollerConfig& config);
 
 #endif

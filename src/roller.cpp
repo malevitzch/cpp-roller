@@ -3,6 +3,7 @@
 #include "grapher.hpp"
 #include "common.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -17,29 +18,40 @@ void print_help() {
             << "\t-I <path>       add include directory\n";
 }
 
-void roll(RollerConfig& config) {
-  if(config.get_flag("version")) {
-    std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
-    exit(EXIT_SUCCESS);
-  }
-  if(config.get_flag("help")) {
-    print_help();
-    exit(EXIT_SUCCESS);
-  }
-  std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
-  if(sources.empty()) {
-    std::cerr << "No source files provided\n";
-    print_help();
-    exit(EXIT_FAILURE);
-  }
-  DependencyGraph graph(config);
-  std::vector<fs::path> sorted = graph.sorted();
-  std::ofstream out(config.get_output_name());
-  for(std::string lib : graph.get_angle_includes()) {
-    out << "#include <" << lib << ">\n";
-  }
-  for(fs::path path : sorted) {
-    send_without_includes(path, out);
+RollResult roll(RollerConfig& config) {
+  try {
+    if(config.get_flag("version")) {
+      std::cout << "cpp-roller version " << ROLLER_VERSION << "\n";
+      return RollResult::Success;
+    }
+    if(config.get_flag("help")) {
+      print_help();
+      return RollResult::Success;
+    }
+    std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
+    if(sources.empty()) {
+      std::cerr << "No source files provided\n";
+      print_help();
+      return RollResult::UserError;
+    }
+    DependencyGraph graph(config);
+    std::vector<fs::path> sorted = graph.sorted();
+    std::ofstream out(config.get_output_name());
+    for(std::string lib : graph.get_angle_includes()) {
+      out << "#include <" << lib << ">\n";
+    }
+    for(fs::path path : sorted) {
+      send_without_includes(path, out);
+    }
+    return RollResult::Success;
+  } catch (FileException& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return RollResult::FilesystemFailure;
+  } catch (fs::filesystem_error& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return RollResult::FilesystemFailure;
+  } catch (std::exception&) {
+    return RollResult::UnexplainedFailure;
   }
 }
 
@@ -53,16 +65,11 @@ RollerConfig& RollerConfig::add_source(std::string source) {
 }
 
 RollerConfig& RollerConfig::add_include_directories(std::string paths) {
-  #ifdef _WIN32
-    constexpr char sep = ';';
-  #else
-    constexpr char sep = ':';
-  #endif
 
   std::istringstream iss{paths};
   std::string part;
-  while (std::getline(iss, part, sep)) {
-    if (!part.empty()) {
+  while(std::getline(iss, part, MULTIPATH_SEP)) {
+    if(!part.empty()) {
       _include_paths.push_back(fs::weakly_canonical(part));
       if constexpr(DEBUG) {
         std::cout << "Added include directory: " << fs::weakly_canonical(part) << "\n";

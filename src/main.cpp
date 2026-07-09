@@ -4,13 +4,6 @@
 #include "roller.hpp"
 #include "common.hpp"
 
-enum class EXIT_CODE : int {
-  SUCCESS = 0,
-  USER_ERROR = 1,
-  FILESYSTEM_FAILURE = 2,
-  UNEXPLAINED_FAILURE = 3,
-};
-
 RollerConfig parse_args(int argc, char** argv) {
   static option long_opts[] = {
     {"help",    no_argument,       nullptr, 'h'},
@@ -37,12 +30,12 @@ RollerConfig parse_args(int argc, char** argv) {
         config.add_include_directories(optarg);
         break;
       case ':': {
-        throw UserException(std::format("The option \"{}\" requires an argument", char(optopt)));
+        throw CLIException(std::format("The option \"{}\" requires an argument", char(optopt)));
       }
       case '?':
-        throw UserException(std::format("Unknown option \"{}\"", char(optopt)));
+        throw CLIException(std::format("Unknown option \"{}\"", char(optopt)));
       default:
-        throw UserException(std::format("Unknown error while parsing option \"{}\"", char(optopt)));
+        throw CLIException(std::format("Unknown error while parsing option \"{}\"", char(optopt)));
     }
   }
   for(int i = optind; i < argc; i++) {
@@ -57,16 +50,12 @@ int main(int argc, char** argv) {
     std::cerr << "cpp-roller has been built in debugging mode, "
               << "build with build type RELEASE if this is not intended\n";
   }
+  RollerConfig config;
   try {
-    RollerConfig config = parse_args(argc, argv);
-    roll(config);
-    return static_cast<int>(EXIT_CODE::SUCCESS);
-  } catch (UserException& e) {
+    config = parse_args(argc, argv);
+  } catch (CLIException& e) {
     std::cerr << "Error: " << e.what() << "\n";
-    return static_cast<int>(EXIT_CODE::USER_ERROR);
-  } catch (...) {
-    std::cerr << "An unexpected error occurred\n";
-    return static_cast<int>(EXIT_CODE::UNEXPLAINED_FAILURE);
+    return static_cast<int>(RollResult::UserError);
   }
-  // TODO: catch more errors
+  return static_cast<int>(roll(config));
 }
