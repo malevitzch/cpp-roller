@@ -1,15 +1,10 @@
 #include <iostream>
-#include <filesystem>
 #include <getopt.h>
+#include <format>
 #include "roller.hpp"
 #include "common.hpp"
 
-int main(int argc, char** argv) {
-  if constexpr(DEBUG) {
-    std::cerr << "cpp-roller has been built in debugging mode, "
-              << "build with build type RELEASE if this is not intended\n";
-  }
-
+RollerConfig parse_args(int argc, char** argv) {
   static option long_opts[] = {
     {"help",    no_argument,       nullptr, 'h'},
     {"version", no_argument,       nullptr, 'v'},
@@ -34,26 +29,33 @@ int main(int argc, char** argv) {
       case 'I':
         config.add_include_directories(optarg);
         break;
-      case ':':
-        std::cerr << "The option \"" << char(optopt) << "\" requires an argument\n";
-        exit(EXIT_FAILURE);
+      case ':': {
+        throw CLIException(std::format("The option \"{}\" requires an argument", char(optopt)));
+      }
       case '?':
-        std::cerr << "Unknown option: \"" << char(optopt) << "\"\n";
-        exit(EXIT_FAILURE);
+        throw CLIException(std::format("Unknown option \"{}\"", char(optopt)));
       default:
-        std::cout << "Parse error: " << opt << "\n";
-        exit(EXIT_FAILURE);
+        throw CLIException(std::format("Unknown error while parsing option \"{}\"", char(optopt)));
     }
   }
   for(int i = optind; i < argc; i++) {
     config.add_source(argv[i]);
   }
+  return config;
+}
 
-  try {
-    roll(config);
-  } catch (std::filesystem::filesystem_error& e) {
-    // TODO: better output
-    std::cerr << e.what() << "\n";
+
+int main(int argc, char** argv) {
+  if constexpr(DEBUG) {
+    std::cerr << "cpp-roller has been built in debugging mode, "
+              << "build with build type RELEASE if this is not intended\n";
   }
-  return 0;
+  RollerConfig config;
+  try {
+    config = parse_args(argc, argv);
+  } catch (CLIException& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return static_cast<int>(RollResult::UserError);
+  }
+  return static_cast<int>(roll(config));
 }

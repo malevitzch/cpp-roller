@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 #include <filesystem>
+#include <format>
 
 #include "files.hpp"
 #include "roller.hpp"
+#include "common.hpp"
 
 #include "fixtures/cleaner.hpp"
 
@@ -20,7 +22,7 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("diamond/parent.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "COMMON_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "LEFT_INCLUDED"), 1);
@@ -35,7 +37,7 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("relative/parent.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "PARENT_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "DIRECT_INCLUDED"), 1);
@@ -54,7 +56,7 @@ namespace {
       .add_source("multi-source/sourceA.cpp")
       .add_source("multi-source/sourceB.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_A_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "SOURCE_B_INCLUDED"), 1);
@@ -72,7 +74,7 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("angle-include-dedup/parent.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "<iostream>"), 1);
   }
@@ -87,7 +89,7 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("duplicate-file/parent.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_INCLUDED"), 1);
   }
@@ -101,12 +103,12 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("unicode/parent.cpp")
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "CHINESE_INCLUDED"), 1);
   }
   /*
-   *
+   * Colon
    */
   TEST_F(TestCleaner, TestIncludeDirectories) {
     assert_file_exists("include-directories/parent.cpp");
@@ -115,12 +117,36 @@ namespace {
     registerFile("rolled.cpp");
     RollerConfig conf = RollerConfig()
       .add_source("include-directories/parent.cpp")
-      .add_include_directories("include-directories/libA/:include-directories/libB/")
+      .add_include_directories(std::format("include-directories/libA/{}include-directories/libB/", MULTIPATH_SEP))
       .name("rolled.cpp");
-    roll(conf);
+    EXPECT_EQ(roll(conf), RollResult::Success);
     assert_file_exists("rolled.cpp");
     ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_A_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_B_INCLUDED"), 1);
+  }
+
+  //
+
+  TEST(TestExitCode, NoSourcesIsUserError) {
+    RollerConfig conf = RollerConfig();
+    EXPECT_EQ(roll(conf), RollResult::UserError);
+  }
+
+  TEST(TestExitCode, VersionFlagSucceeds) {
+    RollerConfig conf = RollerConfig().flag("version");
+    EXPECT_EQ(roll(conf), RollResult::Success);
+  }
+
+  TEST(TestExitCode, HelpFlagSucceeds) {
+    RollerConfig conf = RollerConfig().flag("help");
+    EXPECT_EQ(roll(conf), RollResult::Success);
+  }
+
+  TEST(TestExitCode, MissingSourceIsFilesystemFailure) {
+    RollerConfig conf = RollerConfig()
+      .add_source("does_not_exist.cpp")
+      .name("rolled.cpp");
+    EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
   }
 }
 
