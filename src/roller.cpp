@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <format>
 
 namespace fs = std::filesystem;
 
@@ -72,7 +73,7 @@ RollerConfig& RollerConfig::add_include_directories(std::string paths) {
     if(!part.empty()) {
       _include_paths.push_back(fs::weakly_canonical(part));
       if constexpr(DEBUG) {
-        std::cout << "Added include directory: " << fs::weakly_canonical(part) << "\n";
+        std::cerr << std::format("Added include directory: {}\n", fs::weakly_canonical(part).string());
       }
     }
   }
