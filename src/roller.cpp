@@ -29,6 +29,13 @@ RollResult roll(RollerConfig& config) {
       print_help();
       return RollResult::Success;
     }
+    for(fs::path path : config.get_include_dirs()) {
+      if(path.is_relative()) path = fs::current_path() / path;
+      path = fs::weakly_canonical(path);
+      if(!fs::exists(path)) {
+        throw FileException("Include directory \n\t\"" + path.string() + "\"\ndoes not exist");
+      }
+    }
     std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
     if(sources.empty()) {
       std::cerr << "No source files provided\n";

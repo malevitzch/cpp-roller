@@ -124,8 +124,7 @@ namespace {
     ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_A_INCLUDED"), 1);
     ASSERT_EQ(count_occurences("rolled.cpp", "CHILD_B_INCLUDED"), 1);
   }
-
-  //
+  // Tests for proper "roll" return codes in various scenarios
 
   TEST(TestExitCode, NoSourcesIsUserError) {
     RollerConfig conf = RollerConfig();
@@ -146,6 +145,21 @@ namespace {
     RollerConfig conf = RollerConfig()
       .add_source("does_not_exist.cpp")
       .name("rolled.cpp");
+    EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
+  }
+
+  TEST(TestExitCode, IncludingNonexistentFileIsFilesystemFailure) {
+    assert_file_exists("nonexistent-include.cpp");
+    RollerConfig conf = RollerConfig()
+      .add_source("nonexistent-include.cpp");
+    EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
+  }
+
+  TEST(TestExitCode, NonexistentIncludeDirectoryIsFilesystemFailure) {
+    assert_file_exists("empty.cpp");
+    RollerConfig conf = RollerConfig()
+      .add_source("empty.cpp")
+      .add_include_directories("this_directory_does_not_exist");
     EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
   }
 }
