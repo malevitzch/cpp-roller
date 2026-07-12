@@ -13,6 +13,9 @@ namespace fs = std::filesystem;
 FileData::FileData(fs::path path, FileHash hash) : path(path), hash(hash) {}
 
 FileHash hash_file(std::filesystem::path path) {
+  if(!fs::exists(path)) {
+    throw FileException("No such file as \"" + path.string() + "\"");
+  }
   std::ifstream file(path);
   std::string line;
   size_t hash = 0;
@@ -54,7 +57,16 @@ bool DependencyGraph::add_file(fs::path filepath) {
         break;
       }
     }
-    if(!found) dependencies.push_back(fs::weakly_canonical(dir / p));
+    if(!found) {
+      fs::path dep = fs::weakly_canonical(dir / p);
+      if(!fs::exists(dep)) {
+        throw FileException(
+          "Dependency\n\t\"" + dep.string() +
+          "\"\nrequired by\n\t\"" + filepath.string() +
+          "\"\ndoes not exist");
+      }
+      dependencies.push_back(fs::weakly_canonical(dir / p));
+    }
   }
   if constexpr(DEBUG) {
     std::cout << dependencies.size() << " dependencies found for " << filepath << '\n';
