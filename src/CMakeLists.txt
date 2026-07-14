@@ -2,6 +2,7 @@ set(ROLL_SOURCES
     main.cpp)
 
 set(ROLLIB_SOURCES
+    argparse.cpp
     common.cpp
     extractor.cpp
     grapher.cpp
