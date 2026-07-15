@@ -1,43 +1,43 @@
+#include "common.hpp"
 #include "extractor.hpp"
 
 #include <filesystem>
 #include <optional>
-#include <fstream>
 #include <regex>
 #include <set>
 
 
-static const std::regex quote_include_re(
-  R"==(^[ \t]*#include[ \t]*"([^"]+)"[ \t]*\n?)==",
+static const regex_t quote_include_re(
+  STR(R"==(^[ \t]*#include[ \t]*"([^"]+)"[ \t]*\n?)=="),
   std::regex::ECMAScript
 );
-static const std::regex angle_include_re(
-  R"==(^[ \t]*#include[ \t]*<([^>]+)>[ \t]*\n?)==",
+static const regex_t angle_include_re(
+  STR(R"==(^[ \t]*#include[ \t]*<([^>]+)>[ \t]*\n?)=="),
   std::regex::ECMAScript
 );
 
-std::optional<std::string> get_quote_include(std::string line) {
-  std::smatch match;
+std::optional<string_t> get_quote_include(string_t line) {
+  match_t match;
   if(std::regex_search(line, match, quote_include_re)) return match[1];
   return std::nullopt;
 }
-std::optional<std::string> get_angle_include(std::string line) {
-  std::smatch match;
+std::optional<string_t> get_angle_include(string_t line) {
+  match_t match;
   if(std::regex_search(line, match, angle_include_re)) return match[1];
   return std::nullopt;
 }
 
-bool is_include(std::string line) {
+bool is_include(string_t line) {
   return std::regex_search(line, quote_include_re) || std::regex_search(line, angle_include_re);
 }
 
 Includes extract_includes(std::filesystem::path filename) {
-  std::ifstream input(filename);
+  ifstream_t input(filename);
 
   Includes includes;
-  std::string line;
+  string_t line;
   while(std::getline(input, line)) {
-    std::optional<std::string> inc;
+    std::optional<string_t> inc;
     if((inc = get_quote_include(line))) {
       includes.quote.insert(*inc);
     }
@@ -48,9 +48,9 @@ Includes extract_includes(std::filesystem::path filename) {
   return includes;
 }
 
-std::ostream& send_without_includes(std::filesystem::path filename, std::ostream& output) {
-  std::ifstream input(filename);
-  std::string line;
+ostream_t& send_without_includes(std::filesystem::path filename, ostream_t& output) {
+  ifstream_t input(filename);
+  string_t line;
   while(std::getline(input, line)) {
     if(!is_include(line)) output << line << '\n';
   }

@@ -1,5 +1,5 @@
 #include "files.hpp"
-#include <fstream>
+#include "common.hpp"
 
 #include <gtest/gtest.h>
 
@@ -11,27 +11,31 @@ void assert_file_exists(std::filesystem::path file) {
         << "Path is not a regular file: " << file;
 }
 
-std::string stringify_file(std::filesystem::path file) {
+string_t stringify_file(std::filesystem::path file) {
   if(!std::filesystem::exists(file)) {
-    std::string msg = "Failed to load file \"" + file.string() + "\"";
-    throw std::filesystem::filesystem_error(msg, std::make_error_code(std::errc::no_such_file_or_directory));
+    throw std::filesystem::filesystem_error(
+      "Failed to load file",
+      file,
+      std::make_error_code(std::errc::no_such_file_or_directory)
+    );
   }
 
-  std::ifstream in(file);
-  std::stringstream buffer;
+  ifstream_t in(file);
+  std::basic_stringstream<typename string_t::value_type, typename string_t::traits_type, typename string_t::allocator_type> buffer;
   buffer << in.rdbuf();
   return buffer.str();
 }
 
-int count_occurences(std::filesystem::path file, std::regex regex) {
-  std::string contents = stringify_file(file);
+int count_occurences(std::filesystem::path file, regex_t regex) {
+  string_t contents = stringify_file(file);
 
-  auto begin = std::sregex_iterator(contents.begin(), contents.end(), regex);
-  auto end = std::sregex_iterator();
+  auto begin = std::regex_iterator<typename string_t::const_iterator>(
+    contents.begin(), contents.end(), regex);
+  auto end = std::regex_iterator<typename string_t::const_iterator>();
 
   return std::distance(begin, end);
 }
 
-int count_occurences(std::filesystem::path file, std::string pattern) {
-  return count_occurences(file, std::regex(pattern));
+int count_occurences(std::filesystem::path file, string_t pattern) {
+  return count_occurences(file, regex_t(pattern));
 }

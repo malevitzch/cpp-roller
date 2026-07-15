@@ -10,32 +10,67 @@
 #endif
 
 #include <cstddef>
-#include <exception>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <string>
+#include <regex>
 
 #ifdef _WIN32
-constexpr char MULTIPATH_SEP = ';';
+  #include <windows.h>
+  #define FMTPATH(x) x.wstring()
+  #define STR_(x) L##x
+  #define STR(x) STR_(x)
+  #define STRLEN(x) wcslen(x)
+  constexpr wchar_t MULTIPATH_SEP = ';';
+  using string_t = std::wstring;
+  using regex_t = std::wregex;
+  using match_t = std::wsmatch;
+  using ostream_t = std::wostream;
+  using ofstream_t = std::wofstream;
+  using ifstream_t = std::wifstream;
+  using istringstream_t = std::wistringstream;
+  template<typename T>
+  inline string_t to_string_t(const T& val) {
+    return std::to_wstring(val);
+  }
+  #define ROLLER_CERR std::wcerr
 #else
-constexpr char MULTIPATH_SEP = ':';
+  #define FMTPATH(x) x.string()
+  #define STR(x) x
+  #define STRLEN(x) strlen(x)
+  using string_t = std::string;
+  constexpr char MULTIPATH_SEP = ':';
+  using regex_t = std::regex;
+  using match_t = std::smatch;
+  using ostream_t = std::ostream;
+  using ofstream_t = std::ofstream;
+  using ifstream_t = std::ifstream;
+  using istringstream_t = std::istringstream;
+  template<typename T>
+  inline string_t to_string_t(const T& val) {
+    return std::to_string(val);
+  }
+  #define ROLLER_CERR std::cerr
 #endif
 
 std::size_t hash_combine(std::size_t h1, std::size_t h2);
 
 // Handles improper CLI usage
-class CLIException : public std::exception {
+class CLIException {
 public:
-  explicit CLIException(const std::string& message);
-  virtual const char* what() const noexcept override;
+  explicit CLIException(const string_t& message);
+  string_t what() const noexcept;
 private:
-  std::string message;
+  string_t message;
 };
 
 // Handles missing, unreadable, or otherwise inaccessible files
-class FileException : public std::exception {
+class FileException {
 public:
-  explicit FileException(const std::string& message);
-  virtual const char* what() const noexcept;
+  explicit FileException(const string_t& message);
+  string_t what() const noexcept;
 private:
-  std::string message;
+  string_t message;
 };
 #endif

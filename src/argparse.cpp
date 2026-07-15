@@ -13,14 +13,14 @@ enum class TokType {
 
 struct Token {
   TokType type;
-  std::string value;
+  string_t value;
 };
 
-Token parse_tok(const char* tok) {
+Token parse_tok(const arg_t tok) {
   Token res;
-  int len = strlen(tok);
-  if(tok[0] == '-') {
-    if(len >= 2 && tok[1] == '-') {
+  int len = STRLEN(tok);
+  if(tok[0] == STR('-')) {
+    if(len >= 2 && tok[1] == STR('-')) {
       res.value = tok + 2;
       res.type = TokType::LongOpt;
     } else {
@@ -35,23 +35,23 @@ Token parse_tok(const char* tok) {
 }
 
 struct OptArg {
-  std::string longname;
-  std::string shortname;
+  string_t longname;
+  string_t shortname;
   size_t argcount;
 };
 
-RollerConfig parse_args(int argc, char** argv) {
+RollerConfig parse_args(int argc, args_t argv) {
   RollerConfig config;
-  std::span<char*> args(argv, argc);
+  std::span<arg_t> args(argv, argc);
   auto it = args.begin() + 1;
 
   std::vector<OptArg> optargs = {
-    {"help",    "h", 0},
-    {"version", "v", 0},
-    {"output",  "o", 1},
-    {"include", "I", 1},
+    {STR("help"),    STR("h"), 0},
+    {STR("version"), STR("v"), 0},
+    {STR("output"),  STR("o"), 1},
+    {STR("include"), STR("I"), 1},
   };
-  std::map<std::string, OptArg> optmap;
+  std::map<string_t, OptArg> optmap;
   for(const auto& opt : optargs) {
     optmap[opt.longname] = opt;
     optmap[opt.shortname] = opt;
@@ -61,21 +61,21 @@ RollerConfig parse_args(int argc, char** argv) {
     Token tok = parse_tok(*it);
     if(tok.type == TokType::LongOpt || tok.type == TokType::ShortOpt) {
       if(!optmap.contains(tok.value)) {
-        throw CLIException(std::format("Unknown option \"{}\"", tok.value));
+        throw CLIException(std::format(STR("Unknown option \"{}\""), tok.value));
       }
       auto opt = optmap[tok.value];
       size_t rem = std::distance(it, args.end()) - 1;
       if(rem < opt.argcount) {
-        throw CLIException(std::format("Option \"{}\" requires {} arguments", tok.value, opt.argcount));
+        throw CLIException(std::format(STR("Option \"{}\" requires {} arguments"), tok.value, opt.argcount));
       }
-      std::vector<std::string> optargs(it + 1, it + 1 + opt.argcount);
-      if(opt.longname == "help") {
+      std::vector<string_t> optargs(it + 1, it + 1 + opt.argcount);
+      if(opt.longname == STR("help")) {
         config.flag("help");
-      } else if(opt.longname == "version") {
+      } else if(opt.longname == STR("version")) {
         config.flag("version");
-      } else if(opt.longname == "output") {
+      } else if(opt.longname == STR("output")) {
         config.name(optargs[0]);
-      } else if(opt.longname == "include") {
+      } else if(opt.longname == STR("include")) {
         config.add_include_directories(optargs[0]);
       }
       it += opt.argcount;
@@ -114,12 +114,12 @@ RollerConfig parse_args(int argc, char** argv) {
         config.add_include_directories(optarg);
         break;
       case ':': {
-        throw CLIException(std::format("The option \"{}\" requires an argument", char(optopt)));
+        throw CLIException(std::format(STR("The option \"{}\" requires an argument"), char(optopt)));
       }
       case '?':
-        throw CLIException(std::format("Unknown option \"{}\"", char(optopt)));
+        throw CLIException(std::format(STR("Unknown option \"{}\""), char(optopt)));
       default:
-        throw CLIException(std::format("Unknown error while parsing option \"{}\"", char(optopt)));
+        throw CLIException(std::format(STR("Unknown error while parsing option \"{}\""), char(optopt)));
     }
   }
   for(int i = optind; i < argc; i++) {

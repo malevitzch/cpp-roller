@@ -1,15 +1,15 @@
 #ifndef EXTRACTOR_HPP
 #define EXTRACTOR_HPP
-#include <string>
 #include <filesystem>
 #include <set>
+#include "common.hpp"
 
 struct Includes {
-  std::set<std::string> angle;
-  std::set<std::string> quote;
+  std::set<string_t> angle;
+  std::set<string_t> quote;
 };
 
 Includes extract_includes(std::filesystem::path filename);
-std::ostream& send_without_includes(std::filesystem::path filename, std::ostream& output);
+ostream_t& send_without_includes(std::filesystem::path filename, ostream_t& output);
 
 #endif
