@@ -7,11 +7,11 @@
 #include <set>
 
 
-static const regex_t quote_include_re(
+static const roller_regex_t quote_include_re(
   STR(R"==(^[ \t]*#include[ \t]*"([^"]+)"[ \t]*\n?)=="),
   std::regex::ECMAScript
 );
-static const regex_t angle_include_re(
+static const roller_regex_t angle_include_re(
   STR(R"==(^[ \t]*#include[ \t]*<([^>]+)>[ \t]*\n?)=="),
   std::regex::ECMAScript
 );

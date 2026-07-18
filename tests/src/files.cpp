@@ -26,7 +26,7 @@ string_t stringify_file(std::filesystem::path file) {
   return buffer.str();
 }
 
-int count_occurences(std::filesystem::path file, regex_t regex) {
+int count_occurences(std::filesystem::path file, roller_regex_t regex) {
   string_t contents = stringify_file(file);
 
   auto begin = std::regex_iterator<typename string_t::const_iterator>(
@@ -37,5 +37,5 @@ int count_occurences(std::filesystem::path file, regex_t regex) {
 }
 
 int count_occurences(std::filesystem::path file, string_t pattern) {
-  return count_occurences(file, regex_t(pattern));
+  return count_occurences(file, roller_regex_t(pattern));
 }

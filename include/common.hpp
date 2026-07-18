@@ -23,7 +23,7 @@
   #define STRLEN(x) wcslen(x)
   constexpr wchar_t MULTIPATH_SEP = ';';
   using string_t = std::wstring;
-  using regex_t = std::wregex;
+  using roller_regex_t = std::wregex;
   using match_t = std::wsmatch;
   using ostream_t = std::wostream;
   using ofstream_t = std::wofstream;
@@ -40,7 +40,7 @@
   #define STRLEN(x) strlen(x)
   using string_t = std::string;
   constexpr char MULTIPATH_SEP = ':';
-  using regex_t = std::regex;
+  using roller_regex_t = std::regex;
   using match_t = std::smatch;
   using ostream_t = std::ostream;
   using ofstream_t = std::ofstream;
