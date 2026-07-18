@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <format>
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ FileData::FileData(fs::path path, FileHash hash) : path(path), hash(hash) {}
 
 FileHash hash_file(std::filesystem::path path) {
   if(!fs::exists(path)) {
-    throw FileException("No such file as \"" + path.string() + "\"");
+    throw FileException(std::format(STR("No such file as \"{}\""), FMTPATH(path)));
   }
   std::ifstream file(path);
   std::string line;
@@ -60,16 +61,14 @@ bool DependencyGraph::add_file(fs::path filepath) {
     if(!found) {
       fs::path dep = fs::weakly_canonical(dir / p);
       if(!fs::exists(dep)) {
-        throw FileException(
-          "Dependency\n\t\"" + dep.string() +
-          "\"\nrequired by\n\t\"" + filepath.string() +
-          "\"\ndoes not exist");
+        throw FileException(std::format(STR("Dependency \"{}\" required by \"{}\" does not exist"),
+                                        FMTPATH(dep), FMTPATH(filepath)));
       }
       dependencies.push_back(fs::weakly_canonical(dir / p));
     }
   }
   if constexpr(DEBUG) {
-    std::cout << dependencies.size() << " dependencies found for " << filepath << '\n';
+    std::cerr << dependencies.size() << " dependencies found for " << filepath << '\n';
   }
   for(const auto& dep : dependencies) {
     FileHash dep_hash = get_file_hash(dep);
@@ -96,12 +95,12 @@ std::vector<fs::path> DependencyGraph::sorted() {
   for(auto&[hash, _] : files)
     toposort_dfs(hash, vis, res);
   if constexpr(DEBUG) {
-    std::cout << res.size() << " files sorted\n";
+    std::cerr << res.size() << " files sorted\n";
   }
   return res;
 }
 
-std::set<std::string>& DependencyGraph::get_angle_includes() {
+std::set<string_t>& DependencyGraph::get_angle_includes() {
   return angle_includes;
 }
 

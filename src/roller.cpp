@@ -4,19 +4,18 @@
 #include "common.hpp"
 
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <format>
 
 namespace fs = std::filesystem;
 
 void print_help() {
-  std::cerr << "Usage: cpproll <filenames...>\n"
-            << "Optional arguments:\n"
-            << "\t-o <filename>   set output filename\n"
-            << "\t-v              show version and exit\n"
-            << "\t-h              show this help message and exit\n"
-            << "\t-I <path>       add include directory\n";
+  ROLLER_CERR << "Usage: cpproll <filenames...>\n"
+       << "Optional arguments:\n"
+       << "\t-o <filename>   set output filename\n"
+       << "\t-v              show version and exit\n"
+       << "\t-h              show this help message and exit\n"
+       << "\t-I <path>       add include directory\n";
 }
 
 RollResult roll(RollerConfig& config) {
@@ -33,54 +32,53 @@ RollResult roll(RollerConfig& config) {
       if(path.is_relative()) path = fs::current_path() / path;
       path = fs::weakly_canonical(path);
       if(!fs::exists(path)) {
-        throw FileException("Include directory \n\t\"" + path.string() + "\"\ndoes not exist");
+        throw FileException(std::format(STR("Include directory \n\t\"{}\"\ndoes not exist"), FMTPATH(path)));
       }
     }
     std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
     if(sources.empty()) {
-      std::cerr << "No source files provided\n";
+      ROLLER_CERR << STR("No source files provided\n");
       print_help();
       return RollResult::UserError;
     }
     DependencyGraph graph(config);
     std::vector<fs::path> sorted = graph.sorted();
-    std::ofstream out(config.get_output_name());
-    for(std::string lib : graph.get_angle_includes()) {
-      out << "#include <" << lib << ">\n";
+    ofstream_t out(config.get_output_name());
+    for(string_t lib : graph.get_angle_includes()) {
+      out << STR("#include <") << lib << STR(">\n");
     }
     for(fs::path path : sorted) {
       send_without_includes(path, out);
     }
     return RollResult::Success;
   } catch (FileException& e) {
-    std::cerr << "Error: " << e.what() << "\n";
+    ROLLER_CERR << STR("Error: ") << e.what() << STR("\n");
     return RollResult::FilesystemFailure;
   } catch (fs::filesystem_error& e) {
-    std::cerr << "Error: " << e.what() << "\n";
+    ROLLER_CERR << STR("Error: ") << e.what() << STR("\n");
     return RollResult::FilesystemFailure;
   } catch (std::exception&) {
     return RollResult::UnexplainedFailure;
   }
 }
 
-RollerConfig& RollerConfig::name(std::string new_name) {
+RollerConfig& RollerConfig::name(string_t new_name) {
   _output_name = new_name;
   return *this;
 }
-RollerConfig& RollerConfig::add_source(std::string source) {
+RollerConfig& RollerConfig::add_source(string_t source) {
   _sources.insert(source);
   return *this;
 }
 
-RollerConfig& RollerConfig::add_include_directories(std::string paths) {
-
-  std::istringstream iss{paths};
-  std::string part;
+RollerConfig& RollerConfig::add_include_directories(string_t paths) {
+  istringstream_t iss{paths};
+  string_t part;
   while(std::getline(iss, part, MULTIPATH_SEP)) {
     if(!part.empty()) {
       _include_paths.push_back(fs::weakly_canonical(part));
       if constexpr(DEBUG) {
-        std::cerr << std::format("Added include directory: {}\n", fs::weakly_canonical(part).string());
+        ROLLER_CERR << std::format(STR("Added include directory: {}\n"), FMTPATH(fs::weakly_canonical(part)));
       }
     }
   }
@@ -95,6 +93,6 @@ RollerConfig& RollerConfig::flag(std::string name) {
 }
 
 const std::set<std::filesystem::path>& RollerConfig::get_sources() { return _sources; }
-std::string RollerConfig::get_output_name() { return _output_name; }
+string_t RollerConfig::get_output_name() { return _output_name; }
 bool RollerConfig::get_flag(std::string name) { return _flags[name]; }
 const std::vector<std::filesystem::path>& RollerConfig::get_include_dirs() { return _include_paths; }

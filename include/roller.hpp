@@ -1,5 +1,6 @@
 #ifndef ROLLER_HPP
 #define ROLLER_HPP
+#include "common.hpp"
 
 #include <set>
 #include <map>
@@ -15,21 +16,21 @@ enum class RollResult : int {
 
 class RollerConfig {
   private:
-    std::string _output_name = "a.out";
+    string_t _output_name = STR("a.out");
     std::set<std::filesystem::path> _sources;
     std::map<std::string, bool> _flags;
     std::vector<std::filesystem::path> _include_paths;
     bool _version = false;
   public:
     RollerConfig() = default;
-    RollerConfig& name(std::string new_name);
-    RollerConfig& add_source(std::string source);
-    RollerConfig& add_include_directories(std::string paths);
+    RollerConfig& name(string_t new_name);
+    RollerConfig& add_source(string_t source);
+    RollerConfig& add_include_directories(string_t paths);
     RollerConfig& flag(std::string name, bool value);
     RollerConfig& flag(std::string name);
 
     const std::set<std::filesystem::path>& get_sources();
-    std::string get_output_name();
+    string_t get_output_name();
     bool get_flag(std::string name);
     const std::vector<std::filesystem::path>& get_include_dirs();
 };

@@ -1,11 +1,12 @@
 #ifndef GRAPHER_HPP
 #define GRAPHER_HPP
 
-#include <string>
 #include <vector>
 #include <map>
 #include <set>
 #include <filesystem>
+
+#include "common.hpp"
 
 class DependencyGraph;
 class RollerConfig;
@@ -27,7 +28,7 @@ FileHash hash_file(std::filesystem::path path);
 class DependencyGraph {
 private:
   RollerConfig& config;
-  std::set<std::string> angle_includes;
+  std::set<string_t> angle_includes;
   std::map<FileHash, FileData> files;
   std::map<std::filesystem::path, FileHash> lookup; // To avoid recompute.
   void toposort_dfs(FileHash hash,
@@ -38,7 +39,7 @@ public:
   bool add_file(std::filesystem::path filename);
 
   std::vector<std::filesystem::path> sorted();
-  std::set<std::string>& get_angle_includes();
+  std::set<string_t>& get_angle_includes();
 
   DependencyGraph(RollerConfig& config);
 };
