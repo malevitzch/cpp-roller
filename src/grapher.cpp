@@ -67,7 +67,7 @@ bool DependencyGraph::add_file(fs::path filepath) {
     }
   }
   if constexpr(DEBUG) {
-    std::cout << dependencies.size() << " dependencies found for " << filepath << '\n';
+    std::cerr << dependencies.size() << " dependencies found for " << filepath << '\n';
   }
   for(const auto& dep : dependencies) {
     FileHash dep_hash = get_file_hash(dep);
@@ -94,7 +94,7 @@ std::vector<fs::path> DependencyGraph::sorted() {
   for(auto&[hash, _] : files)
     toposort_dfs(hash, vis, res);
   if constexpr(DEBUG) {
-    std::cout << res.size() << " files sorted\n";
+    std::cerr << res.size() << " files sorted\n";
   }
   return res;
 }
