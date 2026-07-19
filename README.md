@@ -7,15 +7,15 @@ The cpp-roller program makes certain assumptions about how your code is written.
 It only "rolls" the include statements which use quotation marks (that's how it differentiates
 system headers from file includes). It also groups angle bracket includes together and puts them
 at the beginning of the output file, so using odd headers that you want included in some files but
-not in others might have unforeseen consequences. 
+not in others might have unforeseen consequences.
 
 # Known issues and limitations
-- The program currently doesn't build on windows because getopt is not available there
+- Unicode still doesn't work properly on windows
 - Includes that are generated as a result of macro expansion do not and will not ever work due to the nature of the tool
 
 # Usage
 The basic way to use the program is by running 
-```bash 
+```bash
 cpproll <sources>
 ```
 Below is a complete list of available options:
