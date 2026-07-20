@@ -16,11 +16,10 @@ enum class RollResult : int {
 
 class RollerConfig {
   private:
-    string_t _output_name = STR("a.out");
+    string_t _output_name = STR("rolled.out");
     std::set<std::filesystem::path> _sources;
     std::map<std::string, bool> _flags;
     std::vector<std::filesystem::path> _include_paths;
-    bool _version = false;
   public:
     RollerConfig() = default;
     RollerConfig& name(string_t new_name);
