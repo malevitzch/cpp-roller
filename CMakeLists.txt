@@ -11,6 +11,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 include(CTest)
 option(BUILD_TESTING "Build tests" ON)
 
+if(MSVC)
+  add_compile_options(/utf-8)
+endif()
+
 add_subdirectory(src)
 if(BUILD_TESTING)
   set(CMAKE_CTEST_ARGUMENTS --output-on-failure)
