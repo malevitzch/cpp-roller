@@ -1,9 +1,9 @@
 #include "argparse.hpp"
 #include "common.hpp"
 #include <format>
-#include <span>
 
 #ifdef _WIN32
+#include <span>
 
 enum class TokType {
   ShortOpt,
