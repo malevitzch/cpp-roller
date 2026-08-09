@@ -15,7 +15,7 @@ FileData::FileData(fs::path path, FileHash hash) : path(path), hash(hash) {}
 
 FileHash hash_file(std::filesystem::path path) {
   if(!fs::exists(path)) {
-    throw FileException(std::format(STR("No such file as \"{}\""), FMTPATH(path)));
+    throw FileException(std::format("No such file as \"{}\"", path_to_utf8(path)));
   }
   std::ifstream file(path);
   std::string line;
@@ -51,7 +51,7 @@ bool DependencyGraph::add_file(fs::path filepath) {
   for(const auto& p : includes.quote) {
     bool found = false;
     for(const auto& inc_dir : config.get_include_dirs()) {
-      fs::path dep = fs::weakly_canonical(inc_dir / p);
+      fs::path dep = fs::weakly_canonical(inc_dir / path_from_utf8(p));
       if(fs::exists(dep)) {
         dependencies.push_back(dep);
         found = true;
@@ -59,16 +59,16 @@ bool DependencyGraph::add_file(fs::path filepath) {
       }
     }
     if(!found) {
-      fs::path dep = fs::weakly_canonical(dir / p);
+      fs::path dep = fs::weakly_canonical(dir / path_from_utf8(p));
       if(!fs::exists(dep)) {
-        throw FileException(std::format(STR("Dependency \"{}\" required by \"{}\" does not exist"),
-                                        FMTPATH(dep), FMTPATH(filepath)));
+        throw FileException(std::format("Dependency \"{}\" required by \"{}\" does not exist",
+                                        path_to_utf8(dep), path_to_utf8(filepath)));
       }
-      dependencies.push_back(fs::weakly_canonical(dir / p));
+      dependencies.push_back(fs::weakly_canonical(dir / path_from_utf8(p)));
     }
   }
   if constexpr(DEBUG) {
-    std::cerr << dependencies.size() << " dependencies found for " << filepath << '\n';
+    std::cerr << dependencies.size() << " dependencies found for " << path_to_utf8(filepath) << '\n';
   }
   for(const auto& dep : dependencies) {
     FileHash dep_hash = get_file_hash(dep);

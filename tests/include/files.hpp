@@ -3,10 +3,10 @@
 #include <filesystem>
 #include "common.hpp"
 
-void assert_file_exists(std::filesystem::path file);
+void assert_file_exists(string_t file);
 
-string_t stringify_file(std::filesystem::path file);
-int count_occurences(std::filesystem::path file, roller_regex_t regex);
-int count_occurences(std::filesystem::path file, string_t pattern);
+string_t stringify_file(string_t file);
+int count_occurences(string_t file, roller_regex_t regex);
+int count_occurences(string_t file, string_t pattern);
 
 #endif

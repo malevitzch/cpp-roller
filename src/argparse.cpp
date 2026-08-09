@@ -1,131 +1,59 @@
 #include "argparse.hpp"
 #include "common.hpp"
+
 #include <format>
-#include <span>
+#include <string_view>
 
-#ifdef _WIN32
-
-enum class TokType {
-  ShortOpt,
-  LongOpt,
-  Other,
+namespace {
+struct Option {
+  std::string_view long_name;
+  std::string_view short_name;
+  bool takes_argument;
 };
 
-struct Token {
-  TokType type;
-  string_t value;
-};
-
-Token parse_tok(const arg_t tok) {
-  Token res;
-  int len = STRLEN(tok);
-  if(tok[0] == STR('-')) {
-    if(len >= 2 && tok[1] == STR('-')) {
-      res.value = tok + 2;
-      res.type = TokType::LongOpt;
-    } else {
-      res.value = tok + 1;
-      res.type = TokType::ShortOpt;
-    }
-  } else {
-    res.value = tok;
-    res.type = TokType::Other;
+const Option* find_option(std::string_view name) {
+  static constexpr Option options[] = {
+    {"help", "h", false},
+    {"version", "v", false},
+    {"output", "o", true},
+    {"include", "I", true},
+  };
+  for(const auto& option : options) {
+    if(name == option.long_name || name == option.short_name) return &option;
   }
-  return res;
+  return nullptr;
 }
-
-struct OptArg {
-  string_t longname;
-  string_t shortname;
-  size_t argcount;
-};
+}
 
 RollerConfig parse_args(int argc, args_t argv) {
   RollerConfig config;
-  std::span<arg_t> args(argv, argc);
-  auto it = args.begin() + 1;
-
-  std::vector<OptArg> optargs = {
-    {STR("help"),    STR("h"), 0},
-    {STR("version"), STR("v"), 0},
-    {STR("output"),  STR("o"), 1},
-    {STR("include"), STR("I"), 1},
-  };
-  std::map<string_t, OptArg> optmap;
-  for(const auto& opt : optargs) {
-    optmap[opt.longname] = opt;
-    optmap[opt.shortname] = opt;
-  }
-
-  while(it != args.end()) {
-    Token tok = parse_tok(*it);
-    if(tok.type == TokType::LongOpt || tok.type == TokType::ShortOpt) {
-      if(!optmap.contains(tok.value)) {
-        throw CLIException(std::format(STR("Unknown option \"{}\""), tok.value));
-      }
-      auto opt = optmap[tok.value];
-      size_t rem = std::distance(it, args.end()) - 1;
-      if(rem < opt.argcount) {
-        throw CLIException(std::format(STR("Option \"{}\" requires {} arguments"), tok.value, opt.argcount));
-      }
-      std::vector<string_t> optargs(it + 1, it + 1 + opt.argcount);
-      if(opt.longname == STR("help")) {
-        config.flag("help");
-      } else if(opt.longname == STR("version")) {
-        config.flag("version");
-      } else if(opt.longname == STR("output")) {
-        config.name(optargs[0]);
-      } else if(opt.longname == STR("include")) {
-        config.add_include_directories(optargs[0]);
-      }
-      it += opt.argcount;
-    } else {
-      config.add_source(tok.value);
+  for(int i = 1; i < argc; ++i) {
+    string_t argument = argv[i];
+    if(argument.size() < 2 || argument[0] != '-') {
+      config.add_source(argument);
+      continue;
     }
-    it++;
+
+    const bool long_option = argument.size() >= 3 && argument[1] == '-';
+    const std::string_view name(argument.data() + (long_option ? 2 : 1),
+                                argument.size() - (long_option ? 2 : 1));
+    const Option* option = find_option(name);
+    if(!option) {
+      throw CLIException(std::format("Unknown option \"{}\"", name));
+    }
+    if(option->takes_argument && i + 1 >= argc) {
+      throw CLIException(std::format("Option \"{}\" requires an argument", name));
+    }
+
+    if(option->long_name == "help") {
+      config.flag("help");
+    } else if(option->long_name == "version") {
+      config.flag("version");
+    } else if(option->long_name == "output") {
+      config.name(argv[++i]);
+    } else if(option->long_name == "include") {
+      config.add_include_directories(argv[++i]);
+    }
   }
   return config;
 }
-#else
-#include <getopt.h>
-RollerConfig parse_args(int argc, char** argv) {
-  static option long_opts[] = {
-    {"help",    no_argument,       nullptr, 'h'},
-    {"version", no_argument,       nullptr, 'v'},
-    {"output",  required_argument, nullptr, 'o'},
-    {"include", required_argument, nullptr, 'I'},
-    {nullptr,   0,                 nullptr, 0},
-  };
-
-  RollerConfig config;
-  int opt;
-  while ((opt = getopt_long(argc, argv, ":hvo:I:", long_opts, nullptr)) != -1) {
-    switch (opt) {
-      case 'h':
-        config.flag("help");
-        break;
-      case 'v':
-        config.flag("version");
-        break;
-      case 'o':
-        config.name(optarg);
-        break;
-      case 'I':
-        config.add_include_directories(optarg);
-        break;
-      case ':': {
-        throw CLIException(std::format(STR("The option \"{}\" requires an argument"), char(optopt)));
-      }
-      case '?':
-        throw CLIException(std::format(STR("Unknown option \"{}\""), char(optopt)));
-      default:
-        throw CLIException(std::format(STR("Unknown error while parsing option \"{}\""), char(optopt)));
-    }
-  }
-  for(int i = optind; i < argc; i++) {
-    config.add_source(argv[i]);
-  }
-  return config;
-}
-
-#endif
