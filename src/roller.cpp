@@ -32,30 +32,30 @@ RollResult roll(RollerConfig& config) {
       if(path.is_relative()) path = fs::current_path() / path;
       path = fs::weakly_canonical(path);
       if(!fs::exists(path)) {
-        throw FileException(std::format(STR("Include directory \n\t\"{}\"\ndoes not exist"), FMTPATH(path)));
+        throw FileException(std::format("Include directory \n\t\"{}\"\ndoes not exist", path_to_utf8(path)));
       }
     }
     std::vector<fs::path> sources(config.get_sources().begin(), config.get_sources().end());
     if(sources.empty()) {
-      ROLLER_CERR << STR("No source files provided\n");
+      ROLLER_CERR << "No source files provided\n";
       print_help();
       return RollResult::UserError;
     }
     DependencyGraph graph(config);
     std::vector<fs::path> sorted = graph.sorted();
-    ofstream_t out(config.get_output_name());
+    ofstream_t out(path_from_utf8(config.get_output_name()));
     for(string_t lib : graph.get_angle_includes()) {
-      out << STR("#include <") << lib << STR(">\n");
+      out << "#include <" << lib << ">\n";
     }
     for(fs::path path : sorted) {
       send_without_includes(path, out);
     }
     return RollResult::Success;
   } catch (FileException& e) {
-    ROLLER_CERR << STR("Error: ") << e.what() << STR("\n");
+    ROLLER_CERR << "Error: " << e.what() << "\n";
     return RollResult::FilesystemFailure;
   } catch (fs::filesystem_error& e) {
-    ROLLER_CERR << STR("Error: ") << e.what() << STR("\n");
+    ROLLER_CERR << "Error: " << e.what() << "\n";
     return RollResult::FilesystemFailure;
   } catch (std::exception&) {
     return RollResult::UnexplainedFailure;
@@ -67,7 +67,7 @@ RollerConfig& RollerConfig::name(string_t new_name) {
   return *this;
 }
 RollerConfig& RollerConfig::add_source(string_t source) {
-  _sources.insert(source);
+  _sources.insert(path_from_utf8(source));
   return *this;
 }
 
@@ -76,9 +76,9 @@ RollerConfig& RollerConfig::add_include_directories(string_t paths) {
   string_t part;
   while(std::getline(iss, part, MULTIPATH_SEP)) {
     if(!part.empty()) {
-      _include_paths.push_back(fs::weakly_canonical(part));
+      _include_paths.push_back(fs::weakly_canonical(path_from_utf8(part)));
       if constexpr(DEBUG) {
-        ROLLER_CERR << std::format(STR("Added include directory: {}\n"), FMTPATH(fs::weakly_canonical(part)));
+        ROLLER_CERR << std::format("Added include directory: {}\n", path_to_utf8(fs::weakly_canonical(path_from_utf8(part))));
       }
     }
   }

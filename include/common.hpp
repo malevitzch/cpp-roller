@@ -10,48 +10,46 @@
 #endif
 
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <regex>
+#include <sstream>
+#include <string>
+
+using string_t = std::string;
+using roller_regex_t = std::regex;
+using match_t = std::smatch;
+using ostream_t = std::ostream;
+using ofstream_t = std::ofstream;
+using ifstream_t = std::ifstream;
+using istringstream_t = std::istringstream;
 
 #ifdef _WIN32
-  #include <windows.h>
-  #define FMTPATH(x) x.wstring()
-  #define STR_(x) L##x
-  #define STR(x) STR_(x)
-  #define STRLEN(x) wcslen(x)
-  constexpr wchar_t MULTIPATH_SEP = ';';
-  using string_t = std::wstring;
-  using roller_regex_t = std::wregex;
-  using match_t = std::wsmatch;
-  using ostream_t = std::wostream;
-  using ofstream_t = std::wofstream;
-  using ifstream_t = std::wifstream;
-  using istringstream_t = std::wistringstream;
-  template<typename T>
-  inline string_t to_string_t(const T& val) {
-    return std::to_wstring(val);
-  }
-  #define ROLLER_CERR std::wcerr
+constexpr char MULTIPATH_SEP = ';';
 #else
-  #define FMTPATH(x) x.string()
-  #define STR(x) x
-  #define STRLEN(x) strlen(x)
-  using string_t = std::string;
-  constexpr char MULTIPATH_SEP = ':';
-  using roller_regex_t = std::regex;
-  using match_t = std::smatch;
-  using ostream_t = std::ostream;
-  using ofstream_t = std::ofstream;
-  using ifstream_t = std::ifstream;
-  using istringstream_t = std::istringstream;
-  template<typename T>
-  inline string_t to_string_t(const T& val) {
-    return std::to_string(val);
-  }
-  #define ROLLER_CERR std::cerr
+constexpr char MULTIPATH_SEP = ':';
 #endif
+
+// Construct a native filesystem path from UTF-8, including on Windows where
+// filesystem paths use UTF-16 internally.
+inline std::filesystem::path path_from_utf8(const string_t& value) {
+  const auto* data = reinterpret_cast<const char8_t*>(value.data());
+  return std::filesystem::path(std::u8string(data, data + value.size()));
+}
+
+inline string_t path_to_utf8(const std::filesystem::path& value) {
+  const auto utf8 = value.u8string();
+  return {reinterpret_cast<const char*>(utf8.data()), utf8.size()};
+}
+
+#define STR(x) x
+#define ROLLER_CERR std::cerr
+
+template<typename T>
+inline string_t to_string_t(const T& val) {
+  return std::to_string(val);
+}
 
 std::size_t hash_combine(std::size_t h1, std::size_t h2);
 

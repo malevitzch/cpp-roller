@@ -5,13 +5,14 @@
 
 #include <vector>
 #include <filesystem>
+#include "common.hpp"
 
 class Cleaner {
 private:
   std::vector<std::filesystem::path> files;
 protected:
-  void registerFile(const std::filesystem::path& path) {
-    files.push_back(path);
+  void registerFile(const string_t& file) {
+    files.push_back(path_from_utf8(file));
   }
   void cleanup() {
     for(const auto& file : files)
