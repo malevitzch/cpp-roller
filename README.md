@@ -10,7 +10,6 @@ at the beginning of the output file, so using odd headers that you want included
 not in others might have unforeseen consequences. This mostly applies to naming convention clashes.
 
 # Known issues and limitations
-- Unicode still doesn't work properly on windows
 - Includes that are generated as a result of macro expansion might break in certain cases due to the text-based nature of this tool. In general, it is recommended to have all include directives be top-level
 
 # Usage
