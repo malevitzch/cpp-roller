@@ -13,9 +13,9 @@ struct Option {
 
 const Option* find_option(std::string_view name) {
   static constexpr Option options[] = {
-    {"help", "h", false},
+    {"help",    "h", false},
     {"version", "v", false},
-    {"output", "o", true},
+    {"output",  "o", true},
     {"include", "I", true},
   };
   for(const auto& option : options) {

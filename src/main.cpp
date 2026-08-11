@@ -2,9 +2,6 @@
 #include "common.hpp"
 #include "argparse.hpp"
 
-#include <filesystem>
-#include <vector>
-
 int run_main(int argc, args_t argv) {
   if constexpr(DEBUG) {
     ROLLER_CERR << "cpp-roller has been built in debugging mode, "
@@ -21,6 +18,8 @@ int run_main(int argc, args_t argv) {
 }
 
 #ifdef _WIN32
+#include <filesystem>
+#include <vector>
 int wmain(int argc, wchar_t** argv) {
   std::vector<string_t> utf8_args;
   utf8_args.reserve(argc);
