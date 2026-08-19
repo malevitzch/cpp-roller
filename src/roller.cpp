@@ -44,6 +44,10 @@ RollResult roll(RollerConfig& config) {
     DependencyGraph graph(config);
     std::vector<fs::path> sorted = graph.sorted();
     ofstream_t out(path_from_utf8(config.get_output_name()));
+    if(!out) {
+      throw FileException(std::format("Failed to open output file \"{}\"",
+                          path_to_utf8(config.get_output_name())));
+    }
     for(string_t lib : graph.get_angle_includes()) {
       out << "#include <" << lib << ">\n";
     }

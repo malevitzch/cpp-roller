@@ -162,6 +162,13 @@ namespace {
       .add_include_directories(STR("this_directory_does_not_exist"));
     EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
   }
+
+  TEST(TestExitCode, CreatingAFileInNonexistentDirectoryIsFilesystemFailure) {
+    RollerConfig conf = RollerConfig()
+      .add_source(STR("empty.cpp"))
+      .name(STR("nonexistent-dir/rolled.cpp"));
+    EXPECT_EQ(roll(conf), RollResult::FilesystemFailure);
+  }
 }
 
 int main(int argc, char **argv) {
