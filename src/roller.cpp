@@ -16,7 +16,8 @@ void print_help() {
               << "\t-v              show version and exit\n"
               << "\t-h              show this help message and exit\n"
               << "\t-I <path>       add include directory\n"
-              << "\t-f              force overwrite of output file\n";
+              << "\t-f              force overwrite of output file\n"
+              << "\t-n              do not overwrite output file if it exists";
 }
 
 RollResult roll(RollerConfig& config) {

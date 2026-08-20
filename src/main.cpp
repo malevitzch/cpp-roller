@@ -6,7 +6,7 @@
 int run_main(int argc, args_t argv) {
   if constexpr(DEBUG) {
     ROLLER_CERR << "cpp-roller has been built in debugging mode, "
-                << "build with build type RELEASE if this is not intended\n";
+                << "build with build type RELEASE if this is not intended.\n";
   }
   RollerConfig config;
   try {
@@ -16,9 +16,16 @@ int run_main(int argc, args_t argv) {
     return static_cast<int>(RollResult::UserError);
   }
   // TODO: make the y/n part less wonky especially when retrying
-  if(std::filesystem::exists(config.get_output_name()) && !config.get_flag("force")) {
-    bool accepted = false;
-    do {
+  // TODO: maybe separate exit code for exiting for safety reasons (like overwrite)
+  // TODO: this should be done by roller itself
+  if(std::filesystem::exists(config.get_output_name())) {
+    if(config.get_flag("no-overwrite")) {
+      ROLLER_CERR << "Exited because execution would overwrite a file, "
+                  << "but the -n (no-overwrite) option has been set.\n";
+      return EXIT_SUCCESS;
+    }
+    bool accepted = config.get_flag("force");
+    while(!accepted) {
       ROLLER_CERR << "Do you want to overwrite the file \"" 
                   << config.get_output_name() << "\"? [y/n]\n";
       // TODO: windows fix
@@ -26,9 +33,11 @@ int run_main(int argc, args_t argv) {
       if(ch == 'y' || ch == 'Y') {
         accepted = true;
       } else if(ch == 'n' || ch == 'N') {
+        ROLLER_CERR << "Exited because the user declined "
+                    << "permission to overwrite the output file.\n";
         return EXIT_SUCCESS;
       }
-    } while(!accepted);
+    } 
   }
   int rc = static_cast<int>(roll(config));
   return rc;
