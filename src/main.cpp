@@ -1,6 +1,7 @@
 #include "roller.hpp"
 #include "common.hpp"
 #include "argparse.hpp"
+#include <filesystem>
 
 int run_main(int argc, args_t argv) {
   if constexpr(DEBUG) {
@@ -14,7 +15,23 @@ int run_main(int argc, args_t argv) {
     ROLLER_CERR << "Error: " << e.what() << "\n";
     return static_cast<int>(RollResult::UserError);
   }
-  return static_cast<int>(roll(config));
+  // TODO: make the y/n part less wonky especially when retrying
+  if(std::filesystem::exists(config.get_output_name()) && !config.get_flag("force")) {
+    bool accepted = false;
+    do {
+      ROLLER_CERR << "Do you want to overwrite the file \"" 
+                  << config.get_output_name() << "\"? [y/n]\n";
+      // TODO: windows fix
+      char ch = getchar();
+      if(ch == 'y' || ch == 'Y') {
+        accepted = true;
+      } else if(ch == 'n' || ch == 'N') {
+        return EXIT_SUCCESS;
+      }
+    } while(!accepted);
+  }
+  int rc = static_cast<int>(roll(config));
+  return rc;
 }
 
 #ifdef _WIN32

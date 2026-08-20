@@ -11,11 +11,12 @@ namespace fs = std::filesystem;
 
 void print_help() {
   ROLLER_CERR << "Usage: cpproll <filenames...>\n"
-       << "Optional arguments:\n"
-       << "\t-o <filename>   set output filename\n"
-       << "\t-v              show version and exit\n"
-       << "\t-h              show this help message and exit\n"
-       << "\t-I <path>       add include directory\n";
+              << "Optional arguments:\n"
+              << "\t-o <filename>   set output filename\n"
+              << "\t-v              show version and exit\n"
+              << "\t-h              show this help message and exit\n"
+              << "\t-I <path>       add include directory\n"
+              << "\t-f              force overwrite of output file\n";
 }
 
 RollResult roll(RollerConfig& config) {

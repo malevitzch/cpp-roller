@@ -5,24 +5,25 @@
 #include <string_view>
 
 namespace {
-struct Option {
-  std::string_view long_name;
-  std::string_view short_name;
-  bool takes_argument;
-};
-
-const Option* find_option(std::string_view name) {
-  static constexpr Option options[] = {
-    {"help",    "h", false},
-    {"version", "v", false},
-    {"output",  "o", true},
-    {"include", "I", true},
+  struct Option {
+    std::string_view long_name;
+    std::string_view short_name;
+    bool takes_argument;
   };
-  for(const auto& option : options) {
-    if(name == option.long_name || name == option.short_name) return &option;
+  
+  const Option* find_option(std::string_view name) {
+    static constexpr Option options[] = {
+      {"help",    "h", false},
+      {"version", "v", false},
+      {"output",  "o", true },
+      {"include", "I", true },
+      {"force",   "f", false},
+    };
+    for(const auto& option : options) {
+      if(name == option.long_name || name == option.short_name) return &option;
+    }
+    return nullptr;
   }
-  return nullptr;
-}
 }
 
 RollerConfig parse_args(int argc, args_t argv) {
@@ -53,7 +54,10 @@ RollerConfig parse_args(int argc, args_t argv) {
       config.name(argv[++i]);
     } else if(option->long_name == "include") {
       config.add_include_directories(argv[++i]);
+    } else if(option->long_name == "force") {
+      config.flag("force");
     }
+    
   }
   return config;
 }
