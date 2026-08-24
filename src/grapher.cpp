@@ -49,22 +49,23 @@ bool DependencyGraph::add_file(fs::path filepath) {
   fs::path dir = filepath.parent_path();
   std::vector<fs::path> dependencies;
   for(const auto& p : includes.quote) {
-    bool found = false;
-    for(const auto& inc_dir : config.get_include_dirs()) {
-      fs::path dep = fs::weakly_canonical(inc_dir / path_from_utf8(p));
-      if(fs::exists(dep)) {
-        dependencies.push_back(dep);
-        found = true;
-        break;
+    fs::path local_dep = fs::weakly_canonical(dir / path_from_utf8(p));
+    if(!fs::exists(local_dep)) {
+      bool found = false;
+      for(const auto& inc_dir : config.get_include_dirs()) {
+        fs::path dep = fs::weakly_canonical(inc_dir / path_from_utf8(p));
+        if(fs::exists(dep)) {
+          dependencies.push_back(dep);
+          found = true;
+          break;
+        }
       }
-    }
-    if(!found) {
-      fs::path dep = fs::weakly_canonical(dir / path_from_utf8(p));
-      if(!fs::exists(dep)) {
+      if(!found) {
         throw FileException(std::format("Dependency \"{}\" required by \"{}\" does not exist",
-                                        path_to_utf8(dep), path_to_utf8(filepath)));
+                                        path_to_utf8(p), path_to_utf8(filepath)));
       }
-      dependencies.push_back(fs::weakly_canonical(dir / path_from_utf8(p)));
+    } else {
+      dependencies.push_back(local_dep);
     }
   }
   if constexpr(DEBUG) {
