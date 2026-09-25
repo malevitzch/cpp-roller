@@ -19,7 +19,9 @@ cpproll <sources>
 ```
 Below is a complete list of available options:
 - ```-o <filename>``` sets the name for the output file. 
-If left unspecified, the name is a.out
+If left unspecified, the name is rolled.out
 - ```-I <pathstring>``` sets the include directories (pathstring is a collection of paths, separated by either colons or semicolons depending on the system)
 - ```-v``` prints the program version
 - ```-h``` prints the help message
+- ```-f``` forces the program to overwrite the output even if the file already exists
+- ```-n``` forces the program to finish execution if output would overwrite an existing file
