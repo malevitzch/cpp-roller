@@ -13,3 +13,8 @@ FileException::FileException(const string_t& message) : message(message) {}
 string_t FileException::what() const noexcept {
   return message;
 }
+
+DeveloperException::DeveloperException(const string_t& message) : message(message) {}
+string_t DeveloperException::what() const noexcept {
+  return message;
+}

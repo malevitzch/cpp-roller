@@ -57,13 +57,18 @@ RollResult roll(RollerConfig& config) {
       send_without_includes(path, out);
     }
     return RollResult::Success;
-  } catch (FileException& e) {
+  } catch(FileException& e) {
     ROLLER_CERR << "Error: " << e.what() << "\n";
     return RollResult::FilesystemFailure;
-  } catch (fs::filesystem_error& e) {
+  } catch(fs::filesystem_error& e) {
     ROLLER_CERR << "Error: " << e.what() << "\n";
     return RollResult::FilesystemFailure;
-  } catch (std::exception&) {
+  } catch(DeveloperException &e) {
+    ROLLER_CERR << "An internal error has occured."
+                << "Please report this issue to the developers.\n"
+                << "Error: " << e.what() << "\n";
+    return RollResult::DeveloperFailure;
+  } catch(std::exception&) {
     return RollResult::UnexplainedFailure;
   }
 }

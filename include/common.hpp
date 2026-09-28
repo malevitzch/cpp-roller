@@ -70,4 +70,13 @@ public:
 private:
   string_t message;
 };
+
+// Thrown when something that shouldn't happen happens
+class DeveloperException {
+public:
+  explicit DeveloperException(const string_t& message);
+  string_t what() const noexcept;
+private:
+  string_t message;
+};
 #endif

@@ -10,7 +10,7 @@ namespace {
     std::string short_name;
     bool takes_argument;
   };
-  
+
   // TODO: allow clustered options eventually
   const Option* find_option(std::string_view name) {
     static constexpr Option options[] = {
@@ -60,9 +60,8 @@ RollerConfig parse_args(int argc, args_t argv) {
     } else if(option->long_name == "include") {
       config.add_include_directories(argv[++i]);
     } else {
-      // TODO: maybe something more reasonable
-      throw std::runtime_error("Unknown option snuck past parsing stage");
-    } 
+      throw DeveloperException("Unknown option snuck past parsing stage.");
+    }
   }
   return config;
 }

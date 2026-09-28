@@ -11,7 +11,8 @@ enum class RollResult : int {
   Success = 0,
   UserError = 1, // Bad CLI usage
   FilesystemFailure = 2, // Missing/unreadable file
-  UnexplainedFailure = 3, // Anything else
+  DeveloperFailure = 3, // Bug in the roller code
+  UnexplainedFailure = 4, // Anything else
 };
 
 class RollerConfig {
